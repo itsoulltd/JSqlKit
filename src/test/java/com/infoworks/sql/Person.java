@@ -1,0 +1,125 @@
+package com.infoworks.sql;
+
+import com.infoworks.entity.Column;
+import com.infoworks.entity.Entity;
+import com.infoworks.entity.PrimaryKey;
+import com.infoworks.entity.TableName;
+import com.infoworks.sql.executor.SQLExecutor;
+import com.infoworks.sql.query.models.DataType;
+import com.infoworks.sql.query.models.Property;
+
+import java.sql.Date;
+import java.sql.Timestamp;
+
+/*
+ * CREATE TABLE Person
+(
+    uuid_idx varchar(512) PRIMARY KEY NOT NULL,
+    name varchar(512),
+    age int,
+    active boolean,
+    salary double,
+    dob DATETIME,
+    height float
+);
+ */
+
+@TableName(value = "Person")
+public class Person extends Entity {
+
+	@PrimaryKey(name = "uuid")
+	private String uuid_idx;
+
+	@Column(name="name", defaultValue="towhid-islam")
+	private String name_test;
+	
+	@Column(defaultValue="34", type = DataType.INT)
+	private Integer age;
+	
+	@Column(defaultValue="false", type = DataType.BOOL)
+	private Boolean active;
+	
+	@Column(defaultValue="0.00", type = DataType.DOUBLE)
+	private Double salary;
+	
+	private Date dob;
+	
+	@Column(defaultValue="2010-06-21 21:01:01", type=DataType.SQLTIMESTAMP, parseFormat="yyyy-MM-dd HH:mm:ss")
+	private Timestamp createDate;
+	
+	private Float height = 0.10f;
+	
+	//@Column(defaultValue="2010-06-21" , type=DataType.SQLDATE, parseFormat="yyyy-MM-dd")
+	private Date dobDate;
+	
+	//@Column(defaultValue="21:01:01" , type=DataType.SQLTIMESTAMP, parseFormat="HH:mm:ss")
+	private Timestamp createTime = new Timestamp(new java.util.Date().getTime());
+	
+	public Person() {
+		/*uuid_idx = UUID.randomUUID().toString();*/
+	}
+	public String getUuid_idx() {
+		return uuid_idx;
+	}
+	public void setUuid_idx(String uuid_idx) {
+		this.uuid_idx = uuid_idx;
+	}
+	public String getName_test() {
+		return name_test;
+	}
+	public void setName_test(String name_test) {
+		this.name_test = name_test;
+	}
+	public Integer getAge() {
+		return age;
+	}
+	public void setAge(Integer age) {
+		this.age = age;
+	}
+	public Boolean getActive() {
+		return active;
+	}
+	public void setActive(Boolean active) {
+		this.active = active;
+	}
+	public Double getSalary() {
+		return salary;
+	}
+	public void setSalary(Double salary) {
+		this.salary = salary;
+	}
+	public Date getDob() {
+		return dob;
+	}
+	public void setDob(Date dob) {
+		this.dob = dob;
+	}
+	public Float getHeight() {
+		return height;
+	}
+	public void setHeight(Float height) {
+		this.height = height;
+	}
+	public Timestamp getCreateDate() {
+		return createDate;
+	}
+	public void setCreateDate(Timestamp createDate) {
+		this.createDate = createDate;
+	}
+	public Date getDobDate() {
+		return dobDate;
+	}
+	public void setDobDate(Date dobDate) {
+		this.dobDate = dobDate;
+	}
+	public Timestamp getCreateTime() {
+		return createTime;
+	}
+	public void setCreateTime(Timestamp createTime) {
+		this.createTime = createTime;
+	}
+	
+	public Property getPropertyTest(String key, SQLExecutor exe, boolean skipPrimary) {
+		return getProperty(key, exe, skipPrimary);
+	}
+}
