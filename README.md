@@ -1,4 +1,4 @@
-## JSQLEditor
+## JSqlKit
 [![](https://jitpack.io/v/itsoulltd/JSQLEditor.svg)](https://jitpack.io/#itsoulltd/JSQLEditor)
 ### SetUp
        
