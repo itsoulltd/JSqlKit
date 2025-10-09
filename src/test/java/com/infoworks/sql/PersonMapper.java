@@ -1,14 +1,15 @@
 package com.infoworks.sql;
 
-import com.infoworks.sql.entity.RowMapper;
+
+import com.infoworks.entity.EntityMapper;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-public class PersonMapper implements RowMapper<com.it.soul.lab.sql.Person> {
+public class PersonMapper implements EntityMapper<Person> {
     @Override
-    public com.it.soul.lab.sql.Person row(ResultSet rs, int rowNum, int columnCount) throws SQLException {
-        com.it.soul.lab.sql.Person person = new com.it.soul.lab.sql.Person();
+    public Person entity(ResultSet rs, int rowNum, int columnCount) throws SQLException {
+        Person person = new Person();
         person.setUuid_idx(rs.getString("uuid"));
         person.setAge(rs.getInt("age"));
         person.setName_test(rs.getString("name"));

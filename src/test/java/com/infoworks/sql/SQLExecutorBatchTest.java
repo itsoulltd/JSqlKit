@@ -1,7 +1,8 @@
 package com.infoworks.sql;
 
 import com.infoworks.connect.DriverClass;
-import com.infoworks.connect.io.ScriptRunner;
+import com.infoworks.script.SQLScriptExecutor;
+import com.infoworks.sql.executor.SQLExecutor;
 import com.infoworks.sql.query.*;
 import com.infoworks.sql.query.models.Property;
 import com.infoworks.sql.query.models.Row;
@@ -42,7 +43,7 @@ public class SQLExecutorBatchTest {
                 .database("testH2DB")
                 .credential("sa", "").build();
         //
-        ScriptRunner runner = new ScriptRunner();
+        SQLScriptExecutor runner = new SQLScriptExecutor();
         File file = new File("testDB.sql");
         String[] cmds = runner.commands(runner.createStream(file));
         for (String cmd:cmds) {

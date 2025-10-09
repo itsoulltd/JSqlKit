@@ -1,7 +1,8 @@
 package com.infoworks.sql;
 
 import com.infoworks.connect.DriverClass;
-import com.infoworks.connect.io.ScriptRunner;
+import com.infoworks.script.SQLScriptExecutor;
+import com.infoworks.sql.executor.SQLExecutor;
 import com.infoworks.sql.query.models.Expression;
 import com.infoworks.sql.query.models.ExpressionInterpreter;
 import com.infoworks.sql.query.models.Operator;
@@ -35,7 +36,7 @@ public class PersonTest {
 					.database("testH2DB")
 					.credential("sa", "").build();
 			//
-			ScriptRunner runner = new ScriptRunner();
+			SQLScriptExecutor runner = new SQLScriptExecutor();
 			File file = new File("testDB.sql");
 			String[] cmds = runner.commands(runner.createStream(file));
 			for (String cmd:cmds) {
@@ -71,7 +72,7 @@ public class PersonTest {
 
 	@Test
 	public void testUpdate() {
-		com.it.soul.lab.sql.Person person = new com.it.soul.lab.sql.Person();
+		Person person = new Person();
 		person.setUuid_idx(UUID.randomUUID().toString());
 		person.setName_test(getRandomName());
 		try {
@@ -95,7 +96,7 @@ public class PersonTest {
 
 	@Test
 	public void testInsert() {
-		com.it.soul.lab.sql.Person person = new com.it.soul.lab.sql.Person();
+		Person person = new Person();
 		person.setUuid_idx(UUID.randomUUID().toString());
 		person.setName_test(getRandomName());
 		person.setAge(getRandomAge());
@@ -116,7 +117,7 @@ public class PersonTest {
 
 	@Test
 	public void testDelete() {
-		com.it.soul.lab.sql.Person person = new com.it.soul.lab.sql.Person();
+		Person person = new Person();
 		person.setUuid_idx(UUID.randomUUID().toString());
 		person.setName_test(getRandomName());
 		try {
@@ -132,7 +133,7 @@ public class PersonTest {
 	//@Test
 	public void testReadClassOfTSQLExecutorPropertyArray() {
 		try {
-			List<com.it.soul.lab.sql.Person> sons = com.it.soul.lab.sql.Person.read(com.it.soul.lab.sql.Person.class, exe, new Property("name", "Sohana"));
+			List<Person> sons = Person.read(Person.class, exe, new Property("name", "Sohana"));
 			Assert.assertTrue("Count is there", sons.size() > 0);
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -143,8 +144,8 @@ public class PersonTest {
 	public void testReadClassOfTSQLExecutorExpressionInterpreter() {
 		try {
 			ExpressionInterpreter exp = new Expression(new Property("name", "Sohana"), Operator.EQUAL);
-			List<com.it.soul.lab.sql.Person> sons = com.it.soul.lab.sql.Person.read(com.it.soul.lab.sql.Person.class, exe, exp);
-			for (com.it.soul.lab.sql.Person person : sons) {
+			List<Person> sons = Person.read(Person.class, exe, exp);
+			for (Person person : sons) {
 				if(person.getDob() != null) {
 					SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 					System.out.println(formatter.format(person.getDob()));
@@ -163,7 +164,7 @@ public class PersonTest {
 	
 	@Test
 	public void getPropertyTest() {
-		com.it.soul.lab.sql.Person person = new com.it.soul.lab.sql.Person();
+		Person person = new Person();
 		
 		//UseCase when uuid is @PrimaryKey and auto is false.
 		Property prop = person.getPropertyTest("uuid_idx", exe, true);
@@ -185,37 +186,37 @@ public class PersonTest {
 	@Test
 	public void readAsynch(){
 		System.out.println("Test: PageSize: 3 RowCount: 5");
-		com.it.soul.lab.sql.Person.read(com.it.soul.lab.sql.Person.class, exe, 3, 5, null, (persons) -> {
+		Person.read(Person.class, exe, 3, 5, null, (persons) -> {
 			System.out.println("Read Count: " + persons.size());
 		});
 		//
 		System.out.println("Test: PageSize: 2 RowCount: 7");
-		com.it.soul.lab.sql.Person.read(com.it.soul.lab.sql.Person.class, exe, 2, 7, null, (persons) -> {
+		Person.read(Person.class, exe, 2, 7, null, (persons) -> {
 			System.out.println("Read Count: " + persons.size());
 		});
 		//
 		System.out.println("Test: PageSize: 3 RowCount: 2");
-		com.it.soul.lab.sql.Person.read(com.it.soul.lab.sql.Person.class, exe, 3, 2, null, (persons) -> {
+		Person.read(Person.class, exe, 3, 2, null, (persons) -> {
 			System.out.println("Read Count: " + persons.size());
 		});
 		//
 		System.out.println("Test: PageSize: 5 RowCount: 1");
-		com.it.soul.lab.sql.Person.read(com.it.soul.lab.sql.Person.class, exe, 5, 1, null, (persons) -> {
+		Person.read(Person.class, exe, 5, 1, null, (persons) -> {
 			System.out.println("Read Count: " + persons.size());
 		});
 		//
 		System.out.println("Test: PageSize: 5 RowCount: 4");
-		com.it.soul.lab.sql.Person.read(com.it.soul.lab.sql.Person.class, exe, 5, 4, null, (persons) -> {
+		Person.read(Person.class, exe, 5, 4, null, (persons) -> {
 			System.out.println("Read Count: " + persons.size());
 		});
 		//
 		System.out.println("Test: PageSize: 50 RowCount: 400");
-		com.it.soul.lab.sql.Person.read(com.it.soul.lab.sql.Person.class, exe, 50, 400, null, (persons) -> {
+		Person.read(Person.class, exe, 50, 400, null, (persons) -> {
 			System.out.println("Read Count: " + persons.size());
 		});
 		//
 		System.out.println("Test: PageSize: 7 RowCount: ALL");
-		com.it.soul.lab.sql.Person.read(com.it.soul.lab.sql.Person.class, exe, 7, null, (persons) -> {
+		Person.read(Person.class, exe, 7, null, (persons) -> {
 			System.out.println("Read Count: " + persons.size());
 		});
 	}

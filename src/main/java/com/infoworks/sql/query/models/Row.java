@@ -1,6 +1,6 @@
 package com.infoworks.sql.query.models;
 
-import com.infoworks.entity.EntityInterface;
+import com.infoworks.entity.SQLEntity;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -106,8 +106,8 @@ public class Row {
 		Class<T> cls = type;
 		T newInstance = cls.newInstance();
 		Field[] fields;
-		if (EntityInterface.class.isAssignableFrom(cls)){
-		    fields = ((EntityInterface)newInstance).getDeclaredFields(true);
+		if (SQLEntity.class.isAssignableFrom(cls)){
+		    fields = ((SQLEntity)newInstance).getDeclaredFields(true);
         }else{
             fields = cls.getDeclaredFields();
         }

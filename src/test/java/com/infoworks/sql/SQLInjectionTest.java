@@ -1,8 +1,9 @@
 package com.infoworks.sql;
 
 import com.infoworks.connect.DriverClass;
-import com.infoworks.connect.io.ScriptRunner;
-import com.infoworks.sql.entity.Entity;
+import com.infoworks.script.SQLScriptExecutor;
+import com.infoworks.entity.Entity;
+import com.infoworks.sql.executor.SQLExecutor;
 import com.infoworks.sql.query.QueryType;
 import com.infoworks.sql.query.SQLInsertQuery;
 import com.infoworks.sql.query.SQLQuery;
@@ -31,7 +32,7 @@ public class SQLInjectionTest {
                 .database("testH2DB")
                 .credential("sa", "").build();
         //
-        ScriptRunner runner = new ScriptRunner();
+        SQLScriptExecutor runner = new SQLScriptExecutor();
         File file = new File("testDB.sql");
         String[] cmds = runner.commands(runner.createStream(file));
         for (String cmd:cmds) {
@@ -58,9 +59,9 @@ public class SQLInjectionTest {
                 .from("Passenger")
                 .where(new Where("name").isEqualTo("MyName-A")).build();
         System.out.println(query.toString());
-        List<com.it.soul.lab.sql.Passenger> results = exe.executeSelect(query, com.it.soul.lab.sql.Passenger.class, Entity.mapColumnsToProperties(com.it.soul.lab.sql.Passenger.class));
+        List<Passenger> results = exe.executeSelect(query, Passenger.class, Entity.mapColumnsToProperties(Passenger.class));
         Assert.assertEquals(results.size(), 1);
-        results.forEach(pass -> System.out.println(pass.marshallingToMap(true)));
+        results.forEach(pass -> System.out.println(pass.marshalling(true)));
 
         //AVOID: 'OR'/'or'/'AND'/'and' in the value. e.g. SELECT * FROM Users WHERE UserId = 105 OR 1=1;
         query = new SQLQuery.Builder(QueryType.SELECT)
@@ -68,7 +69,7 @@ public class SQLInjectionTest {
                 .from("Passenger")
                 .where(new Where("name").isEqualTo("MyName-A OR 1=1")).build();
         System.out.println(query.toString());
-        results = exe.executeSelect(query, com.it.soul.lab.sql.Passenger.class, Entity.mapColumnsToProperties(com.it.soul.lab.sql.Passenger.class));
+        results = exe.executeSelect(query, Passenger.class, Entity.mapColumnsToProperties(Passenger.class));
         Assert.assertEquals(results.size(), 0);
 
         //AVOID: ""="" e.g.  SELECT * FROM Users WHERE Name ="" or ""="" AND Pass ="" or ""="";
@@ -77,7 +78,7 @@ public class SQLInjectionTest {
                 .from("Passenger")
                 .where(new Where("name").isEqualTo("MyName-A OR \"\"=\"\"")).build();
         System.out.println(query.toString());
-        results = exe.executeSelect(query, com.it.soul.lab.sql.Passenger.class, Entity.mapColumnsToProperties(com.it.soul.lab.sql.Passenger.class));
+        results = exe.executeSelect(query, Passenger.class, Entity.mapColumnsToProperties(Passenger.class));
         Assert.assertEquals(results.size(), 0);
 
         //AVOID: Batched SQL Statements. e.g.
@@ -90,7 +91,7 @@ public class SQLInjectionTest {
                 .from("Passenger")
                 .where(new Where("name").isEqualTo("MyName-A ; DROP TABLE Passenger;")).build();
         System.out.println(query.toString());
-        results = exe.executeSelect(query, com.it.soul.lab.sql.Passenger.class, Entity.mapColumnsToProperties(com.it.soul.lab.sql.Passenger.class));
+        results = exe.executeSelect(query, Passenger.class, Entity.mapColumnsToProperties(Passenger.class));
         Assert.assertEquals(results.size(), 0);
     }
 
@@ -104,9 +105,9 @@ public class SQLInjectionTest {
                 .from("Passenger")
                 .where(new Where("name").isLike("%Na%")).build();
         System.out.println(query.bindValueToString());
-        List<com.it.soul.lab.sql.Passenger> results = exe.executeSelect(query.bindValueToString(), com.it.soul.lab.sql.Passenger.class, Entity.mapColumnsToProperties(com.it.soul.lab.sql.Passenger.class));
+        List<Passenger> results = exe.executeSelect(query.bindValueToString(), Passenger.class, Entity.mapColumnsToProperties(Passenger.class));
         Assert.assertEquals(results.size(), 1);
-        results.forEach(pass -> System.out.println(pass.marshallingToMap(true)));
+        results.forEach(pass -> System.out.println(pass.marshalling(true)));
 
         //AVOID: 'OR'/'or'/'AND'/'and' in the value. e.g. SELECT * FROM Users WHERE UserId = 105 OR 1=1;
         query = new SQLQuery.Builder(QueryType.SELECT)
@@ -114,7 +115,7 @@ public class SQLInjectionTest {
                 .from("Passenger")
                 .where(new Where("name").isEqualTo("MyName-A OR 1=1")).build();
         System.out.println(query.bindValueToString());
-        results = exe.executeSelect(query.bindValueToString(), com.it.soul.lab.sql.Passenger.class, Entity.mapColumnsToProperties(com.it.soul.lab.sql.Passenger.class));
+        results = exe.executeSelect(query.bindValueToString(), Passenger.class, Entity.mapColumnsToProperties(Passenger.class));
         Assert.assertEquals(results.size(), 0);
 
         //AVOID: ""="" e.g.  SELECT * FROM Users WHERE Name ="" or ""="" AND Pass ="" or ""="";
@@ -123,7 +124,7 @@ public class SQLInjectionTest {
                 .from("Passenger")
                 .where(new Where("name").isEqualTo("MyName-A OR \"\"=\"\"")).build();
         System.out.println(query.bindValueToString());
-        results = exe.executeSelect(query.bindValueToString(), com.it.soul.lab.sql.Passenger.class, Entity.mapColumnsToProperties(com.it.soul.lab.sql.Passenger.class));
+        results = exe.executeSelect(query.bindValueToString(), Passenger.class, Entity.mapColumnsToProperties(Passenger.class));
         Assert.assertEquals(results.size(), 0);
 
         //AVOID: ""="" e.g.  SELECT * FROM Users WHERE Name ="" or ""="" AND Pass ="" or ""="";
@@ -132,7 +133,7 @@ public class SQLInjectionTest {
                 .from("Passenger")
                 .where(new Where("name").isLike("%ame% OR \"\"=\"\"")).build();
         System.out.println(query.bindValueToString());
-        results = exe.executeSelect(query.bindValueToString(), com.it.soul.lab.sql.Passenger.class, Entity.mapColumnsToProperties(com.it.soul.lab.sql.Passenger.class));
+        results = exe.executeSelect(query.bindValueToString(), Passenger.class, Entity.mapColumnsToProperties(Passenger.class));
         Assert.assertEquals(results.size(), 0);
 
         //AVOID: Batched SQL Statements. e.g.
@@ -145,7 +146,7 @@ public class SQLInjectionTest {
                 .from("Passenger")
                 .where(new Where("name").isEqualTo("MyName-A ; DROP TABLE Passenger;")).build();
         System.out.println(query.bindValueToString());
-        results = exe.executeSelect(query.bindValueToString(), com.it.soul.lab.sql.Passenger.class, Entity.mapColumnsToProperties(com.it.soul.lab.sql.Passenger.class));
+        results = exe.executeSelect(query.bindValueToString(), Passenger.class, Entity.mapColumnsToProperties(Passenger.class));
         Assert.assertEquals(results.size(), 0);
     }
 

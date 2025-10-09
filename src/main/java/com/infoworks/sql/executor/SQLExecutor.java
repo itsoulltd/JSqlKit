@@ -1127,7 +1127,7 @@ public class SQLExecutor extends AbstractExecutor implements QueryExecutor<SQLSe
 				}
 				//
 				Entity test = clType.newInstance();
-				test.unmarshallingFromMap(map, true);
+				test.unmarshalling(map, true);
 				items.add((T) test);
 			} catch (InstantiationException e) {
 				e.printStackTrace();

@@ -15,7 +15,7 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 
-public abstract class Entity implements EntityInterface{
+public abstract class Entity implements SQLEntity {
 	public Entity() {
 		super();
 	}
@@ -309,7 +309,7 @@ public abstract class Entity implements EntityInterface{
         return result;
     }
 
-    public Map<String, Object> marshallingToMap(boolean inherit) {
+    public Map<String, Object> marshalling(boolean inherit) {
         Map<String, Object> result = new HashMap<>();
         for (Field field : getDeclaredFields(inherit)) {
 			if (field.isAnnotationPresent(Ignore.class))
@@ -319,9 +319,9 @@ public abstract class Entity implements EntityInterface{
 				//Notice:We are interested into reading just the filed name:value into a map.
 				try {
 					Object fieldValue = field.get(this);
-					if (fieldValue != null && EntityInterface.class.isAssignableFrom(fieldValue.getClass())){
-						EntityInterface enIf = (EntityInterface) fieldValue;
-						result.put(field.getName(), enIf.marshallingToMap(inherit));
+					if (fieldValue != null && SQLEntity.class.isAssignableFrom(fieldValue.getClass())){
+						SQLEntity enIf = (SQLEntity) fieldValue;
+						result.put(field.getName(), enIf.marshalling(inherit));
 					}else {
 						result.put(field.getName(), fieldValue);
 					}
@@ -332,7 +332,7 @@ public abstract class Entity implements EntityInterface{
         return result;
     }
 
-	public void unmarshallingFromMap(Map<String, Object> data, boolean inherit){
+	public void unmarshalling(Map<String, Object> data, boolean inherit){
 		if (data != null) {
 			Field[] fields = getDeclaredFields(inherit);
 			for (Field field : fields) {
@@ -343,11 +343,11 @@ public abstract class Entity implements EntityInterface{
 					Object entry = data.get(field.getName());
 					if(entry != null) {
 						try {
-							if (EntityInterface.class.isAssignableFrom(field.getType())){
+							if (SQLEntity.class.isAssignableFrom(field.getType())){
 								//Now we can say this might-be a marshaled object that confirm to EntityInterface,
-								EntityInterface enIf = (EntityInterface) field.getType().newInstance();
+								SQLEntity enIf = (SQLEntity) field.getType().newInstance();
 								if(entry instanceof Map)
-									enIf.unmarshallingFromMap((Map<String, Object>) entry, true);
+									enIf.unmarshalling((Map<String, Object>) entry, true);
 								field.set(this, enIf);
 							}else{
 								field.set(this, entry);
@@ -847,7 +847,7 @@ public abstract class Entity implements EntityInterface{
 		Row row = new Row();
 		Class<? extends Entity> aClass = this.getClass();
 		List<String> skipList = Arrays.asList(skipColumns);
-		Map<String, Object> data = marshallingToMap(true);
+		Map<String, Object> data = marshalling(true);
 		//
 		Map<String, String> columnNameMap = mapColumnsToProperties(aClass);
 		if (columnNameMap != null && !columnNameMap.isEmpty()){
@@ -872,7 +872,7 @@ public abstract class Entity implements EntityInterface{
 	public static <T extends Entity> Map<String, List<T>> groupBy(String groupByKey, List<T> rows){
 		Map<String, List<T>> results = new ConcurrentHashMap<>();
 		for (T row : rows) {
-			Map<String, Object> map = row.marshallingToMap(true);
+			Map<String, Object> map = row.marshalling(true);
 			String theKey = map.get(groupByKey).toString(); //key's value going to be the results-key
 			List<T> items = results.get(theKey);
 			if (items == null) {

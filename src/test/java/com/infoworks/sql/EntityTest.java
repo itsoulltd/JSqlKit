@@ -27,12 +27,12 @@ public class EntityTest {
         me.car.body.madeOf = "Steel";
         me.car.body.numberOfDoors = null;
 
-        Map<String, Object> data = me.marshallingToMap(true);
+        Map<String, Object> data = me.marshalling(true);
         //Map<String, Object> carData = (Map<String, Object>) data.get("car");
 
         //Create a New Owner form data
         Owner nOwner = new Owner();
-        nOwner.unmarshallingFromMap(data,true);
+        nOwner.unmarshalling(data,true);
         Car nCar = nOwner.getCar();
         //
         Assert.assertEquals("Both Car Must Be same", me.car, nCar);

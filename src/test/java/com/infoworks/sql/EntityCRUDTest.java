@@ -1,6 +1,6 @@
 package com.infoworks.sql;
 
-import com.infoworks.PerformanceLogger;
+import com.infoworks.PLogger;
 import com.infoworks.connect.DriverClass;
 import com.infoworks.script.SQLScriptExecutor;
 import com.infoworks.entity.Entity;
@@ -105,7 +105,7 @@ public class EntityCRUDTest {
         Assert.assertTrue(count == 0);
         System.out.println("Before COUNT: " + count);
         //
-        PerformanceLogger logger = new PerformanceLogger();
+        PLogger logger = new PLogger();
         insertSeedPassengerInBatch(exe);
         logger.printMillis("InsertInBatch: ");
         //
@@ -119,7 +119,7 @@ public class EntityCRUDTest {
         //Seeding:
         insertSeedPassengerInBatch(exe);
         //
-        PerformanceLogger logger = new PerformanceLogger();
+        PLogger logger = new PLogger();
         Predicate clause = new Where("name").isLike("%Islam%");
         Entity.read(Passenger.class, exe, 5, clause, (pass) -> {
             //Printing: Page By Page
@@ -134,7 +134,7 @@ public class EntityCRUDTest {
         //Seeding:
         insertSeedPassengerInBatch(exe);
         //
-        PerformanceLogger logger = new PerformanceLogger();
+        PLogger logger = new PLogger();
         Predicate clause = new Where("name").isLike("%Islam%");
         List<Passenger> pass = Entity.read(Passenger.class, exe, clause);
         logger.printMillis("Read-Sync: ");
@@ -153,7 +153,7 @@ public class EntityCRUDTest {
                 .map(passenger -> passenger.getName() + ":" + passenger.getAge())
                 .forEach(System.out::println);
         //
-        PerformanceLogger logger = new PerformanceLogger();
+        PLogger logger = new PLogger();
         Entity.update(Passenger.class, exe
                 , new Where("name").isLike("%Tow%")
                 , new Row().add("name", "MD.Towhid Islam")
@@ -178,7 +178,7 @@ public class EntityCRUDTest {
         Assert.assertTrue(count > 0);
         System.out.println("Before Count: " + count);
         //
-        PerformanceLogger logger = new PerformanceLogger();
+        PLogger logger = new PLogger();
         Entity.delete(Passenger.class, exe, new Where("name").isLike("%Tow%"));
         logger.printMillis("Delete: ");
         //
@@ -192,7 +192,7 @@ public class EntityCRUDTest {
         //Seeding
         insertSeedPassenger(exe);
         //
-        PerformanceLogger logger = new PerformanceLogger();
+        PLogger logger = new PLogger();
         int count = Entity.count(Passenger.class, exe, null);
         Assert.assertTrue(count > 0);
         logger.printMillis("Scalar: ");

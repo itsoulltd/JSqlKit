@@ -10,7 +10,7 @@ import java.util.List;
  * @author towhid
  * @since 19-Aug-19
  */
-public interface RowMapper<R extends Entity> {
+public interface EntityMapper<R extends Entity> {
     default List<R> extract(ResultSet rs) throws SQLException {
         int index = 0;
         List<R> collection = new ArrayList<>();
@@ -18,11 +18,11 @@ public interface RowMapper<R extends Entity> {
         int numCol = rsmd.getColumnCount();
         while (rs.next()){
             try {
-                R entity = row(rs, index++, numCol);
+                R entity = entity(rs, index++, numCol);
                 collection.add(entity);
-            } catch (SQLException e) {}
+            } catch (SQLException e) { throw new RuntimeException(e); }
         }
         return collection;
     }
-    R row(ResultSet rs, int rowNum, int columnCount) throws SQLException;
+    R entity(ResultSet rs, int rowNum, int columnCount) throws SQLException;
 }

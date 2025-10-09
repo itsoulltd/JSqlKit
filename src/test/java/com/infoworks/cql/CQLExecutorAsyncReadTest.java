@@ -120,7 +120,7 @@ public class CQLExecutorAsyncReadTest {
         otherItems2.stream().forEach(event ->
                 System.out.println("ASC Event:  "
                         + formatter.format(new Date(event.getTimestamp()))
-                        + " " + event.marshallingToMap(true))
+                        + " " + event.marshalling(true))
         );
     }
 
@@ -154,7 +154,7 @@ public class CQLExecutorAsyncReadTest {
             otherItems2.stream().forEach(event ->
                     System.out.println("ASC Event:  "
                             + formatter.format(new Date(event.getTimestamp()))
-                            + " " + event.marshallingToMap(true))
+                            + " " + event.marshalling(true))
             );
             //Find the next timestamp for pagination: which will use in next fetch:
             if (otherItems2.isEmpty()) continue;
@@ -195,7 +195,7 @@ public class CQLExecutorAsyncReadTest {
                     orderEvents.stream().forEach(event ->
                             System.out.println("Event:  "
                                     + formatter.format(new Date(event.getTimestamp()))
-                                    + " " + event.marshallingToMap(true))
+                                    + " " + event.marshalling(true))
                     );
                     System.out.println("Row Count: " + orderEvents.size() + " \n");
                 });

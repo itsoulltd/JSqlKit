@@ -264,7 +264,7 @@ public class CQLExecutorTest {
             otherItems.stream().forEach(event ->
                     System.out.println("DESC Event:  "
                             + formatter.format(new Date(event.getTimestamp()))
-                            + " " + event.marshallingToMap(true))
+                            + " " + event.marshalling(true))
             );
             Assert.assertTrue(otherItems.size() > 0);
             System.out.println("\n");
@@ -284,7 +284,7 @@ public class CQLExecutorTest {
             otherItems2.stream().forEach(event ->
                     System.out.println("ASC Event:  "
                             + formatter.format(new Date(event.getTimestamp()))
-                            + " " + event.marshallingToMap(true))
+                            + " " + event.marshalling(true))
             );
             Assert.assertTrue(otherItems2.size() > 0);
             //
@@ -307,7 +307,7 @@ public class CQLExecutorTest {
         otherItems2.stream().forEach(event ->
                 System.out.println("ASC Event:  "
                         + formatter.format(new Date(event.getTimestamp()))
-                        + " " + event.marshallingToMap(true))
+                        + " " + event.marshalling(true))
         );
     }
 

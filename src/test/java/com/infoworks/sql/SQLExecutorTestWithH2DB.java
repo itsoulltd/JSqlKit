@@ -1,8 +1,9 @@
 package com.infoworks.sql;
 
 import com.infoworks.connect.DriverClass;
-import com.infoworks.connect.io.ScriptRunner;
-import com.infoworks.sql.entity.Entity;
+import com.infoworks.script.SQLScriptExecutor;
+import com.infoworks.entity.Entity;
+import com.infoworks.sql.executor.SQLExecutor;
 import com.infoworks.sql.query.*;
 import com.infoworks.sql.query.models.*;
 import org.junit.After;
@@ -29,7 +30,7 @@ public class SQLExecutorTestWithH2DB extends SQLExecutorTest {
                 .query(";DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=TRUE;") //DATABASE_TO_LOWER=TRUE;CASE_INSENSITIVE_IDENTIFIERS=TRUE
                 .build();
         //
-        ScriptRunner runner = new ScriptRunner();
+        SQLScriptExecutor runner = new SQLScriptExecutor();
         File file = new File("testDB.sql");
         String[] cmds = runner.commands(runner.createStream(file));
         for (String cmd:cmds) {
@@ -47,7 +48,7 @@ public class SQLExecutorTestWithH2DB extends SQLExecutorTest {
     }
 
     private Long seedPassengers() throws SQLException {
-        return insertSeed(exe, com.it.soul.lab.sql.Passenger.class, 100);
+        return insertSeed(exe, Passenger.class, 100);
     }
 
     @Test
@@ -140,7 +141,7 @@ public class SQLExecutorTestWithH2DB extends SQLExecutorTest {
         String query = "Select * from Passenger where name = ? and age > ?";
         ResultSet set = exe.executeSelect(query, new Property("name", "MyName-A"), new Property("age", 19));
         Table table = exe.collection(set);
-        List<com.it.soul.lab.sql.Passenger> results = table.inflate(com.it.soul.lab.sql.Passenger.class, Entity.mapColumnsToProperties(com.it.soul.lab.sql.Passenger.class));
+        List<Passenger> results = table.inflate(Passenger.class, Entity.mapColumnsToProperties(Passenger.class));
         Assert.assertTrue(results.size() == 1);
     }
 
@@ -157,7 +158,7 @@ public class SQLExecutorTestWithH2DB extends SQLExecutorTest {
         // (pageSize:30 - rowCount:1030)  (pageSize:30 - rowCount:29)
         // (pageSize:1 - rowCount:-1)   (pageSize:1 - rowCount:0)  [Fetch single row from DB]
         // (pageSize:0 - rowCount:-1)   (pageSize:-1 - rowCount:-1) [Caution: Both will fetch all rows from DB]
-        com.it.soul.lab.sql.Passenger.read(com.it.soul.lab.sql.Passenger.class, exe
+        Passenger.read(Passenger.class, exe
                 , 5, 21
                 , new Property("CREATEDATE", new java.sql.Date(startTime))
                 , Operator.ASC
@@ -170,7 +171,7 @@ public class SQLExecutorTestWithH2DB extends SQLExecutorTest {
                     passengers.stream().forEach(event ->
                             System.out.println("Event:  "
                                     + formatter.format(event.getCreatedate())
-                                    + " " + event.marshallingToMap(true))
+                                    + " " + event.marshalling(true))
                     );
                     System.out.println("Row Count: " + passengers.size() + " \n");
                 });
@@ -187,7 +188,7 @@ public class SQLExecutorTestWithH2DB extends SQLExecutorTest {
         // (pageSize:10)  (pageSize:30 ) (pageSize:5)
         // (pageSize:1)   [Fetch single row from DB]
         // (pageSize:0)   [No row shall return]
-        com.it.soul.lab.sql.Passenger.read(com.it.soul.lab.sql.Passenger.class, exe
+        Passenger.read(Passenger.class, exe
                 , 30
                 , new Property("CREATEDATE", new java.sql.Date(startTime))
                 , Operator.ASC
@@ -200,7 +201,7 @@ public class SQLExecutorTestWithH2DB extends SQLExecutorTest {
                     passengers.stream().forEach(event ->
                             System.out.println("Event:  "
                                     + formatter.format(event.getCreatedate())
-                                    + " " + event.marshallingToMap(true))
+                                    + " " + event.marshalling(true))
                     );
                     System.out.println("Row Count: " + passengers.size() + " \n");
                 });
@@ -215,10 +216,10 @@ public class SQLExecutorTestWithH2DB extends SQLExecutorTest {
         //=========================================//
         SQLSelectQuery qu14 = new SQLQuery.Builder(QueryType.SELECT)
                 .columns()
-                .from(Entity.tableName(com.it.soul.lab.sql.Passenger.class))
+                .from(Entity.tableName(Passenger.class))
                 .addLimit(5, 0)
                 .build();
-        List<com.it.soul.lab.sql.Passenger> res = exe.executeSelect(qu14, com.it.soul.lab.sql.Passenger.class);
+        List<Passenger> res = exe.executeSelect(qu14, Passenger.class);
         Assert.assertTrue(res.size() == 5);
         //=========================================//
         //output result:
@@ -227,16 +228,16 @@ public class SQLExecutorTestWithH2DB extends SQLExecutorTest {
         res.forEach(event ->
                 System.out.println("Event:  "
                         + formatter.format(event.getCreatedate())
-                        + " " + event.marshallingToMap(true))
+                        + " " + event.marshalling(true))
         );
         System.out.println(" \n");
         //=========================================//
         qu14 = new SQLQuery.Builder(QueryType.SELECT)
                 .columns()
-                .from(Entity.tableName(com.it.soul.lab.sql.Passenger.class))
+                .from(Entity.tableName(Passenger.class))
                 .addLimit(10, 5)
                 .build();
-        res = exe.executeSelect(qu14, com.it.soul.lab.sql.Passenger.class);
+        res = exe.executeSelect(qu14, Passenger.class);
         Assert.assertTrue(res.size() == 10);
         //=========================================//
         //output result:
@@ -245,16 +246,16 @@ public class SQLExecutorTestWithH2DB extends SQLExecutorTest {
         res.forEach(event ->
                 System.out.println("Event:  "
                         + formatter.format(event.getCreatedate())
-                        + " " + event.marshallingToMap(true))
+                        + " " + event.marshalling(true))
         );
         System.out.println(" \n");
         //=========================================//
         qu14 = new SQLQuery.Builder(QueryType.SELECT)
                 .columns()
-                .from(Entity.tableName(com.it.soul.lab.sql.Passenger.class))
+                .from(Entity.tableName(Passenger.class))
                 .addLimit(10, -5)
                 .build();
-        res = exe.executeSelect(qu14, com.it.soul.lab.sql.Passenger.class);
+        res = exe.executeSelect(qu14, Passenger.class);
         Assert.assertTrue(res.size() == 10);
         //=========================================//
         //output result:
@@ -263,7 +264,7 @@ public class SQLExecutorTestWithH2DB extends SQLExecutorTest {
         res.forEach(event ->
                 System.out.println("Event:  "
                         + formatter.format(event.getCreatedate())
-                        + " " + event.marshallingToMap(true))
+                        + " " + event.marshalling(true))
         );
         System.out.println(" \n");
         //=========================================//

@@ -4,7 +4,7 @@ import com.google.common.base.Stopwatch;
 
 import java.util.concurrent.TimeUnit;
 
-public class PerformanceLogger {
+public class PLogger {
 
     private Stopwatch watch = Stopwatch.createStarted();
 

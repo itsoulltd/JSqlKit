@@ -181,7 +181,7 @@ public class SQLExecutorTestWithMySQL extends SQLExecutorTest {
                     passengers.stream().forEach(event ->
                             System.out.println("Event:  "
                                     + formatter.format(event.getCreatedate())
-                                    + " " + event.marshallingToMap(true))
+                                    + " " + event.marshalling(true))
                     );
                     System.out.println("Row Count: " + passengers.size() + " \n");
                 });
@@ -216,7 +216,7 @@ public class SQLExecutorTestWithMySQL extends SQLExecutorTest {
                     passengers.stream().forEach(event ->
                             System.out.println("Event:  "
                                     + formatter.format(event.getCreatedate())
-                                    + " " + event.marshallingToMap(true))
+                                    + " " + event.marshalling(true))
                     );
                     System.out.println("Row Count: " + passengers.size() + " \n");
                 });
@@ -247,7 +247,7 @@ public class SQLExecutorTestWithMySQL extends SQLExecutorTest {
         res.forEach(event ->
                 System.out.println("Event:  "
                         + formatter.format(event.getCreatedate())
-                        + " " + event.marshallingToMap(true))
+                        + " " + event.marshalling(true))
         );
         System.out.println(" \n");
         //=========================================//
@@ -265,7 +265,7 @@ public class SQLExecutorTestWithMySQL extends SQLExecutorTest {
         res.forEach(event ->
                 System.out.println("Event:  "
                         + formatter.format(event.getCreatedate())
-                        + " " + event.marshallingToMap(true))
+                        + " " + event.marshalling(true))
         );
         System.out.println(" \n");
         //=========================================//
@@ -283,7 +283,7 @@ public class SQLExecutorTestWithMySQL extends SQLExecutorTest {
         res.forEach(event ->
                 System.out.println("Event:  "
                         + formatter.format(event.getCreatedate())
-                        + " " + event.marshallingToMap(true))
+                        + " " + event.marshalling(true))
         );
         System.out.println(" \n");
         //=========================================//
