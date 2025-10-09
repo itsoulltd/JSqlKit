@@ -1,0 +1,1595 @@
+package com.infoworks.sql.executor;
+
+import com.infoworks.connect.DriverClass;
+import com.infoworks.connect.JDBConnection;
+import com.infoworks.entity.Entity;
+import com.infoworks.sql.query.*;
+import com.infoworks.sql.query.models.DataType;
+import com.infoworks.sql.query.models.Property;
+import com.infoworks.sql.query.models.Row;
+import com.infoworks.sql.query.models.Table;
+
+import java.sql.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+public class SQLExecutor extends AbstractExecutor implements QueryExecutor<SQLSelectQuery, SQLInsertQuery, SQLUpdateQuery, SQLDeleteQuery, SQLScalarQuery> {
+
+	public static class Builder {
+		private JDBConnection.Builder connectionBuilder;
+		private DriverClass driver;
+		public Builder(DriverClass driver){
+			connectionBuilder = new JDBConnection.Builder(driver);
+			this.driver = driver;
+		}
+		public Builder host(String name, String port) {
+			connectionBuilder.host(name, port);
+			return this;
+		}
+		public Builder database(String name) {
+			connectionBuilder.database(name);
+			return this;
+		}
+		public Builder credential(String name, String password){
+			connectionBuilder.credential(name, password);
+			return this;
+		}
+		public Builder query(String query){
+			connectionBuilder.query(query);
+			return this;
+		}
+		public SQLExecutor build() throws Exception {
+			Connection conn = connectionBuilder.build();
+			SQLExecutor executor = new SQLExecutor(conn);
+			executor.setDialect(driver);
+			return executor;
+		}
+	}
+
+	private static Logger LOG = Logger.getLogger(SQLExecutor.class.getSimpleName());
+	private final Connection conn;
+	private DriverClass dialect = DriverClass.MYSQL;
+
+	@Override
+	public DriverClass getDialect() {
+		return dialect;
+	}
+
+	public void setDialect(DriverClass dialect){
+		this.dialect = dialect;
+	}
+
+	public SQLExecutor(Connection conn){ this.conn = conn; }
+
+	/**
+	 * https://www.baeldung.com/java-finalize#avoiding-finalizers
+	 */
+	/*@Override
+	protected void finalize() throws Throwable {
+		//As Suggested In JDK-Doc:
+		//Unreleased statement object goes to garbage:
+		try {
+			close();
+		} finally {
+			super.finalize();
+		}
+	}*/
+	
+	/**
+     * Following object container holds all Statement object belongs to any connections
+     */
+    private List<Statement> statementHolder = null;
+    
+    private List<Statement> getStatementHolder() {
+    	if(null == statementHolder){
+    		statementHolder = new ArrayList<Statement>();
+    	}
+		return statementHolder;
+	}
+	
+	public void close() {
+		try {
+			int count = getStatementHolder().size();
+			Boolean isAllClosed = true;
+			if(count > 0){
+				for (Statement iterable_element : getStatementHolder()) {
+					try{
+						iterable_element.close();
+					}catch (SQLException e){
+						isAllClosed = false;
+					}
+				}
+			}
+			getStatementHolder().clear();
+			LOG.info("Retained Statements count was "
+					+ count
+                    + ". All statements has been Closed : "
+					+ (isAllClosed ? "YES":"NO"));
+			closeConnections(conn);
+		} catch (SQLException e) {
+            LOG.log(Level.WARNING, e.getMessage(), e);
+		} catch (Exception e) {
+			LOG.log(Level.WARNING, e.getMessage());
+		}
+	}
+	
+	private void closeConnections(Connection conn) throws SQLException {
+		if(conn != null && !conn.isClosed()){
+			try{
+				if(!conn.getAutoCommit()) {
+					conn.commit();
+                    LOG.info("Executor-Connection Has been committed.");
+				}
+			}catch(SQLException exp){
+				if(!conn.getAutoCommit())
+					conn.rollback();
+				throw exp;
+			}
+			finally{
+				try {
+					if(conn != null && !conn.isClosed()) {
+					    conn.close();
+                        LOG.info("Executor-Connection Has been Closed.");
+                    }
+				} catch (SQLException e) {
+                    LOG.log(Level.WARNING, e.getMessage(), e);
+				}
+			}
+		}
+	}
+	
+	public void begin() throws SQLException {
+		if(conn != null && conn.isClosed() == false) {
+			conn.setAutoCommit(false);
+		}
+	}
+	
+	public void end() throws SQLException {
+		if(conn != null && conn.isClosed() == false) {
+			conn.commit();
+			conn.setAutoCommit(true);
+		}
+	}
+	
+	public void abort() throws SQLException {
+		if(conn != null && conn.isClosed() == false) {
+			conn.rollback();
+			conn.setAutoCommit(true);
+		}
+	}
+	
+	/**
+	 * 
+	 * @param o
+	 */
+	public void displayCollection(Object o){
+		LOG.info(toString(o));
+	}
+
+/////////////////////////////////////QueryExecutor-Interface/////////////////////////////////////////////
+
+
+	@Override
+	public SQLQuery.Builder createQueryBuilder(QueryType queryType) {
+		return new SQLQuery.Builder(queryType);
+	}
+
+	@Override
+	public <T extends Entity> List<T> executeCRUDQuery(String query, Class<T> type) throws SQLException, IllegalAccessException, InstantiationException {
+		ResultSet set = executeCRUDQuery(query);
+		if (set != null){
+			Table table = collection(set);
+			List results = table.inflate(type, Entity.mapColumnsToProperties(type));
+			set.close();
+			return results;
+		}
+		return null;
+	}
+
+	public Integer executeUpdate(SQLUpdateQuery query) throws SQLException {
+
+		Row setProperties = query.getRow();
+		if(setProperties == null
+				|| setProperties.size() <= 0){
+			throw new SQLException("Set Parameter Should not be bull or empty!!!");
+		}
+
+		int rowUpdated = 0;
+		PreparedStatement stmt=null;
+		String queryStr = query.toString(getDialect());
+		String[] whereKeySet = query.getWhereProperties().getKeys();
+
+		try{
+			if(conn != null){
+				stmt = conn.prepareStatement(queryStr);
+				int length = setProperties.size();
+				stmt = bindValueToStatement(stmt, 1, setProperties.getKeys(), setProperties.keyValueMap());
+				if(whereKeySet != null)
+					stmt = bindValueToStatement(stmt, length+1, whereKeySet, query.getWhereProperties().keyValueMap());
+				rowUpdated = stmt.executeUpdate();
+			}
+		}
+		catch(SQLException exp) { throw exp;}
+		catch (IllegalArgumentException e) { throw e;}
+		finally{
+			if(stmt != null) stmt.close();
+		}
+		return rowUpdated;
+	}
+
+    public Integer executeUpdate(String query) throws SQLException {
+        if(query == null
+                || query.isEmpty()){
+            throw new SQLException("Query Should not be bull or empty!!!");
+        }
+        PreparedStatement stmt=null;
+        String queryStr = query;
+        return getRowUpdated( stmt, queryStr);
+    }
+
+    private int getRowUpdated(PreparedStatement stmt, String queryStr) throws SQLException {
+        int rowUpdated = 0;
+        try{
+            if(conn != null){
+                stmt = conn.prepareStatement(queryStr);
+                rowUpdated = stmt.executeUpdate();
+            }
+        }
+        catch(SQLException exp) { throw exp;}
+        catch (IllegalArgumentException e) { throw e;}
+        finally{
+            if(stmt != null) stmt.close();
+        }
+        return rowUpdated;
+    }
+
+    public Integer[] executeUpdate(int size, SQLUpdateQuery updateQuery, List<Row> rows) throws SQLException, IllegalArgumentException {
+
+        if(rows == null
+                || rows.size() <= 0){
+            throw new SQLException("Set Parameter Should not be bull or empty!!!");
+        }
+
+        List<Integer> affectedRows = new ArrayList<Integer>();
+        PreparedStatement stmt = null;
+        String query = updateQuery.toString(getDialect());
+
+        boolean notBegin = conn.getAutoCommit();
+        try{
+            size = (size < 100) ? 100 : size;//Least should be 100
+            if(conn != null){
+                //
+                List<int[]> batchUpdatedRowsCount = new ArrayList<int[]>();
+                if(notBegin) begin();
+                stmt = conn.prepareStatement(query);
+                int batchCount = 0;
+                for (int index = 0; index < rows.size(); index++) {
+
+                    String[] keySet = rows.get(index).getKeys();
+                    Map<String, Property> row = rows.get(index).keyValueMap();
+                    stmt = bindValueToStatement(stmt, 1, keySet, row);
+
+                    int length = keySet.length;
+                    Row whereProperties = updateQuery.getWhereProperties();
+                    String[] whereKeySet = whereProperties.getKeys();
+                    Map<String, Property> whereRow = whereProperties.keyValueMap();
+                    stmt = bindValueToStatement(stmt, length + 1, whereKeySet, whereRow);
+
+                    stmt.addBatch();
+                    if ((++batchCount % size) == 0) {
+                        batchUpdatedRowsCount.add(stmt.executeBatch());
+                    }
+                }
+                if(rows.size() % size != 0)
+                    batchUpdatedRowsCount.add(stmt.executeBatch());
+                //
+                if(notBegin) end();
+                //
+                for (int[] rr  : batchUpdatedRowsCount) {
+                    for(int i = 0; i < rr.length ; i++){
+                        affectedRows.add(rr[i]);
+                    }
+                }
+
+            }
+        }catch(SQLException | IllegalArgumentException exp){
+            if(notBegin) abort();
+            throw exp;
+        }finally{
+            clearBatch(stmt);
+        }
+        return affectedRows.toArray(new Integer[]{});
+    }
+
+    @Override
+    public Integer[] executeUpdate(int size, List<SQLUpdateQuery> queries) throws SQLException, IllegalArgumentException {
+        if(queries == null
+                || queries.size() <= 0){
+            throw new SQLException("Set Parameter Should not be bull or empty!!!");
+        }
+
+        List<Integer> affectedRows = new ArrayList<Integer>();
+        Statement stmt = null;
+        boolean notBegin = conn.getAutoCommit();
+        try{
+            size = (size < 100) ? 100 : size;//Least should be 100
+            if(conn != null){
+                //
+                List<int[]> batchUpdatedRowsCount = new ArrayList<int[]>();
+                if(notBegin) begin();
+                int batchCount = 0;
+				//Using Query Param Binding:
+				for (SQLUpdateQuery upQuery : queries) {
+					if (stmt == null) {
+						stmt = conn.prepareStatement(upQuery.toString());
+					}
+
+					String[] keySet = upQuery.getRow().getKeys();
+					Map<String, Property> row = upQuery.getRow().keyValueMap();
+					stmt = bindValueToStatement((PreparedStatement)stmt, 1, keySet, row);
+
+					int length = keySet.length;
+					Row whereProperties = upQuery.getWhereProperties();
+					String[] whereKeySet = whereProperties.getKeys();
+					Map<String, Property> whereRow = whereProperties.keyValueMap();
+					stmt = bindValueToStatement((PreparedStatement)stmt, length + 1, whereKeySet, whereRow);
+
+					((PreparedStatement)stmt).addBatch();
+					if ((++batchCount % size) == 0) {
+						batchUpdatedRowsCount.add(stmt.executeBatch());
+					}
+				}
+				if(stmt != null && queries.size() % size != 0)
+					batchUpdatedRowsCount.add(stmt.executeBatch());
+                //
+                if(notBegin) end();
+                //
+                for (int[] rr  : batchUpdatedRowsCount) {
+                    for(int i = 0; i < rr.length ; i++){
+                        affectedRows.add(rr[i]);
+                    }
+                }
+
+            }
+        }catch(SQLException | IllegalArgumentException exp){
+            if(notBegin) abort();
+            throw exp;
+        }finally{
+            clearBatch(stmt);
+        }
+        return affectedRows.toArray(new Integer[]{});
+    }
+
+    public Integer executeDelete(SQLDeleteQuery deleteQuery)
+			throws SQLException {
+		//
+		int rowUpdated = 0;
+		PreparedStatement stmt=null;
+		String query = deleteQuery.toString(getDialect());
+		try{
+			if(conn != null){
+				stmt = conn.prepareStatement(query);
+				stmt = bindValueToStatement(stmt, 1, deleteQuery.getWhereParams(), deleteQuery.getWhereProperties().keyValueMap());
+				rowUpdated = stmt.executeUpdate();
+			}
+		}catch(SQLException exp){
+			throw exp;
+		}catch (IllegalArgumentException e) {
+			throw e;
+		}finally{
+			if(stmt != null) stmt.close();
+		}
+		return rowUpdated;
+	}
+
+    public Integer executeDelete(String deleteQuery)
+            throws SQLException {
+        if(deleteQuery == null || deleteQuery.isEmpty()){
+            throw new SQLException("Query should not be null or empty!!!");
+        }
+        PreparedStatement stmt=null;
+        String query = deleteQuery;
+        int rowUpdated = getRowUpdated(stmt, query);
+        return rowUpdated;
+    }
+
+    @Override
+    public Integer executeDelete(int size, SQLDeleteQuery deleteQuery, List<Row> where) throws SQLException {
+	    //
+        if(deleteQuery.getWhereParams() == null || deleteQuery.getWhereParams().length <= 0){
+            throw new SQLException("Where parameter should not be null or empty!!!");
+        }
+        //
+        int rowUpdated = 0;
+        PreparedStatement stmt=null;
+        String query = deleteQuery.toString(getDialect());
+        String[] whereKeySet = where.get(0).getKeys();
+        boolean notBegin = conn.getAutoCommit();
+        try{
+            size = (size < 100) ? 100 : size;//Least should be 100
+            if(conn != null){
+                if(notBegin) begin();
+                int batchCount = 0;
+                stmt = conn.prepareStatement(query);
+                for (Row paramValue: where) {
+                    stmt = bindValueToStatement(stmt, 1, whereKeySet, paramValue.keyValueMap());
+                    stmt.addBatch();
+                    if ((++batchCount % size) == 0) {
+                        int[] c = stmt.executeBatch();
+                        rowUpdated += c.length;
+                    }
+                }
+                if(where.size() % size != 0) {
+					int[] c = stmt.executeBatch();
+					rowUpdated += c.length;
+				}
+                //
+                if(notBegin) end();
+            }
+        }catch(SQLException | IllegalArgumentException exp){
+            if(notBegin) abort();
+            throw exp;
+        }finally{
+            clearBatch(stmt);
+        }
+        return rowUpdated;
+    }
+
+	public Integer executeInsert(boolean autoId, String query)
+			throws SQLException, IllegalArgumentException {
+
+		int lastIncrementedID = 0;
+		PreparedStatement stmt=null;
+		try{
+			if(query != null
+					&& query.length() > 0
+					&& !query.toUpperCase().startsWith("INSERT")){
+				throw new IllegalArgumentException("Query string must be a Insert query!");
+			}
+			if(conn != null){
+				if (autoId) {
+					stmt = conn.prepareStatement(query, Statement.RETURN_GENERATED_KEYS);
+					stmt.executeUpdate();
+					ResultSet rs = stmt.getGeneratedKeys();
+					if (rs != null && rs.next())
+						try { lastIncrementedID = rs.getInt(1); } catch (SQLException e) {}
+				}else{
+					stmt = conn.prepareStatement(query);
+					lastIncrementedID = stmt.executeUpdate();
+				}
+			}
+		}catch(SQLException exp){
+			throw exp;
+		}catch(IllegalArgumentException iel){
+			throw iel;
+		}finally{
+			if(stmt != null) stmt.close();
+		}
+		return lastIncrementedID;
+	}
+
+	public Integer executeInsert(boolean autoId, SQLInsertQuery insertQuery)
+			throws SQLException, IllegalArgumentException {
+
+		if(insertQuery.getColumns() == null || insertQuery.getColumns().length <= 0){
+			throw new SQLException("Parameter should not be null or empty!!!");
+		}
+
+		int affectedRows = 0;
+		PreparedStatement stmt=null;
+		String query = insertQuery.toString(getDialect());
+
+		try{
+			if(conn != null){
+				if(autoId){
+					stmt = conn.prepareStatement(query,	Statement.RETURN_GENERATED_KEYS);
+					stmt = bindValueToStatement(stmt, 1,insertQuery.getRow().getKeys(), insertQuery.getRow().keyValueMap());
+					stmt.executeUpdate();
+					ResultSet set = stmt.getGeneratedKeys();
+					if(set != null && set.next()){
+						try { affectedRows = set.getInt(1); } catch (SQLException e) {}
+						set.close();
+					}
+				}else{
+					stmt = conn.prepareStatement(query);
+					stmt = bindValueToStatement(stmt, 1, insertQuery.getRow().getKeys(), insertQuery.getRow().keyValueMap());
+					affectedRows = stmt.executeUpdate();
+				}
+			}
+		}catch(SQLException exp){
+			throw exp;
+		}catch(IllegalArgumentException iel){
+			throw iel;
+		}finally{
+			if(stmt != null) stmt.close();
+		}
+		return affectedRows;
+	}
+
+    @Override
+    public Integer[] executeInsert(boolean autoId, int size, SQLInsertQuery insertQuery, List<Row> rows) throws SQLException, IllegalArgumentException {
+        if(rows == null || rows.size() <= 0){
+            throw new SQLException("Parameter should not be null or empty!!!");
+        }
+        List<Integer> affectedRows = new ArrayList<Integer>();
+        PreparedStatement stmt=null;
+        //
+        Object[] keySet = rows.get(0).getKeys();
+        String query = insertQuery.toString(getDialect());
+        boolean notBegin = conn.getAutoCommit();
+        //
+        try{
+            size = (size < 100) ? 100 : size;//Least should be 100
+            if(conn != null){
+                if(notBegin) begin();
+                stmt = autoId
+                        ? conn.prepareStatement(query, Statement.RETURN_GENERATED_KEYS)
+                        : conn.prepareStatement(query);
+                int batchCount = 0;
+                List<int[]> batchUpdatedRowsCount = new ArrayList<int[]>();
+                for (Row row : rows) {
+                    stmt = bindValueToStatement(stmt, 1, keySet, row.keyValueMap());
+                    stmt.addBatch();
+                    if((++batchCount % size) == 0){
+                        batchUpdatedRowsCount.add(stmt.executeBatch());
+                    }
+                }
+                if(rows.size() % size != 0)
+                    batchUpdatedRowsCount.add(stmt.executeBatch());
+                //
+                if(notBegin) end();
+                for (int[] rr  : batchUpdatedRowsCount) {
+                    for(int i = 0; i < rr.length ; i++){
+                        affectedRows.add(rr[i]);
+                    }
+                }
+                //
+            }
+        }catch(SQLException | IllegalArgumentException exp){
+            if(notBegin) abort();
+            throw exp;
+        }finally{
+            clearBatch(stmt);
+        }
+        return affectedRows.toArray(new Integer[]{});
+    }
+
+    private void clearBatch(Statement stmt) throws SQLException {
+        if(stmt != null){
+            try {
+                stmt.clearBatch();
+            } catch (Exception e) {
+                LOG.log(Level.WARNING, e.getMessage(), e);
+            }
+            stmt.close();
+        }
+    }
+
+	public Integer getScalarValue(String query)
+			throws SQLException {
+
+		ResultSet rs = null;
+		PreparedStatement pstmt = null;
+		int rowCount = 0;
+		try{
+			if(conn != null){
+				pstmt = conn.prepareStatement(query);
+				rs = pstmt.executeQuery();
+				if (rs.next()) {
+					try { rowCount = rs.getInt(1); } catch (SQLException e) {}
+				} else {
+					rowCount=0;
+				}
+			}
+		}catch(SQLException e){
+			throw e;
+		}finally{
+			if(pstmt != null)
+				pstmt.close();
+		}
+		return rowCount;
+	}
+
+	public Integer getScalarValue(SQLScalarQuery scalarQuery)
+			throws SQLException {
+
+		ResultSet rs = null;
+		PreparedStatement pstmt = null;
+		int rowCount = 0;
+		String query = scalarQuery.toString(getDialect());
+		Row whereClause = scalarQuery.getWhereProperties();
+		try{
+			if(conn != null){
+				pstmt = conn.prepareStatement(query);
+				pstmt = bindValueToStatement(pstmt
+						, 1
+						, whereClause.getKeys()
+						, whereClause.keyValueMap());
+				rs = pstmt.executeQuery();
+				if (rs.next()) {
+					try { rowCount = rs.getInt(1); } catch (SQLException e) {}
+				} else {
+					rowCount=0;
+				}
+			}
+		}catch(SQLException e){
+			throw e;
+		}finally{
+			if(pstmt != null)
+				pstmt.close();
+		}
+		return rowCount;
+	}
+
+	public <T extends Entity> List<T> executeSelect(String query, Class<T> type)
+			throws SQLException, IllegalArgumentException, IllegalAccessException, InstantiationException {
+		return executeSelect(query, type, Entity.mapColumnsToProperties(type));
+	}
+
+	@Override
+	public <T extends Entity> List<T> executeSelect(String query, Class<T> type, Map<String, String> mappingKeys)
+			throws SQLException, IllegalArgumentException, IllegalAccessException, InstantiationException {
+		ResultSet set = executeSelect(query);
+		Table table = collection(set);
+		List result = table.inflate(type, mappingKeys);
+		if(set != null) set.close();
+		return result;
+	}
+
+	public <T extends Entity> List<T> executeSelect(SQLSelectQuery query, Class<T> type)
+			throws SQLException, IllegalArgumentException, IllegalAccessException, InstantiationException {
+		return executeSelect(query, type, Entity.mapColumnsToProperties(type));
+	}
+
+	@Override
+	public <T extends Entity> List<T> executeSelect(SQLSelectQuery query, Class<T> type, Map<String, String> mappingKeys)
+			throws SQLException, IllegalArgumentException, IllegalAccessException, InstantiationException {
+		ResultSet set = executeSelect(query);
+		Table table = collection(set);
+		List result = table.inflate(type, mappingKeys);
+		if(set != null) set.close();
+		return result;
+	}
+
+	public Boolean executeDDLQuery(String query) throws SQLException {
+
+		if(query == null
+				|| query.length() <=0
+				/*|| !query.trim().toLowerCase().startsWith("create")
+				|| !query.trim().toLowerCase().startsWith("drop")
+				|| !query.trim().toLowerCase().startsWith("alter")*/){
+			throw new SQLException("Bad Formatted Query : " + query);
+		}
+
+		return executeDDLStatement(query);
+	}
+
+	protected Boolean executeDDLStatement(String query) throws SQLException {
+		boolean isCreated = false;
+		PreparedStatement stmt = null;
+		try{
+			if(conn != null){
+				stmt = conn.prepareStatement(query);
+				int result = stmt.executeUpdate();
+				isCreated = result == 0;
+			}
+		}catch(SQLException exp){
+			throw exp;
+		}finally{
+			if(stmt != null) stmt.close();
+		}
+		return isCreated;
+	}
+
+////////////////////////////////////Block Of Queries///////////////////////
+
+	public boolean useDatabase(String database) throws SQLException {
+
+		if (database == null || database.trim().isEmpty()) return false;
+
+		String query = "USE " + database;
+		return executeDDLStatement(query);
+	}
+
+	public <T extends Entity> Boolean createTable(Class<T> tableType, DriverClass driverClass) throws SQLException {
+		String tableNameStr = getTableName(tableType);
+		if (tableNameStr == null) return false;
+
+		StringBuffer headBuffer = new StringBuffer("CREATE TABLE IF NOT EXISTS " + tableNameStr);
+
+		if (driverClass == DriverClass.MYSQL){
+			//TODO:
+		}else{
+			//TODO:
+		}
+		return false;
+	}
+
+	/**
+	 * Display rows in a Result Set
+	 * @param rst
+	 */
+	public void displayResultSet(ResultSet rst){
+		StringBuffer buffer = new StringBuffer();
+		try{
+			if(rst.getType() == ResultSet.TYPE_SCROLL_SENSITIVE && rst.isAfterLast()){
+				rst.beforeFirst();
+			}
+			ResultSetMetaData rsmd = rst.getMetaData();
+			int numCol = rsmd.getColumnCount();
+			int totalHeaderLenght = 0;
+			for(int x = 1; x <= numCol; x++){
+				String columnName = "     " + rsmd.getColumnLabel(x) + "     ";
+				totalHeaderLenght += columnName.length();
+				buffer.append(columnName);
+			}
+
+			buffer.append('\n');
+			for(int x = 0; x <= totalHeaderLenght; x++){
+				buffer.append("-");
+			}
+			buffer.append('\n');
+
+			boolean more = rst.next();
+			while(more){
+				for(int x = 1; x <= numCol; x++){
+					buffer.append("     "+rst.getString(x)+"     ");
+				}
+				buffer.append('\n');
+				more=rst.next();
+			}
+		}catch(SQLException e){
+            LOG.log(Level.WARNING, e.getMessage(), e);
+		}
+
+		LOG.info(buffer.toString());
+	}
+	
+	
+    /**
+     * Query for Update,Insert,Delete
+     * @param query
+     * @return Number Of affected rows
+     */
+    protected ResultSet executeCRUDQuery(String query) throws SQLException {
+    	
+    	if(query == null 
+				|| query.length() <=0){
+			throw new SQLException("Bad Formated Query : " + query);
+		}
+    	
+    	if(query.trim().toLowerCase().startsWith("insert")
+				|| query.trim().toLowerCase().startsWith("update")
+				|| query.trim().toLowerCase().startsWith("delete")) {    		
+            PreparedStatement stmt = null;
+            try{ 
+                if(conn != null){
+                    stmt = conn.prepareStatement(query);
+                    int rowUpdate = stmt.executeUpdate();
+                    LOG.info("rows effected " + (rowUpdate == 0 ? "NO" : "YES"));
+                }            
+            }catch(SQLException exp){
+                throw exp;
+            }finally{
+            	if(stmt != null)
+            		stmt.close();
+            }
+            return null;
+    	}else {
+    		return executeSelect(query);
+    	}	
+    }
+
+    @Deprecated
+    private Row getLeastAppropriateProperties(List<Row> items, int index){
+    	if(items == null || items.isEmpty()){
+    		return new Row();
+    	}
+    	if(index < items.size()){
+    		return items.get(index);
+    	}else{
+    		return items.get(0);
+    	}
+    }
+    
+    /**
+     * Query for select
+     * @param query
+     * @return ResultSet
+     */
+    public ResultSet executeSelect(String query, Property...properties)
+    throws SQLException, IllegalArgumentException {
+    	
+        PreparedStatement stmt = null;
+        ResultSet rst=null;
+        try{
+        	
+        	if(query != null 
+	    			&& query.length() > 0 
+	    			&& !query.toUpperCase().startsWith("SELECT")){
+	    		throw new IllegalArgumentException("Query string must be a Select query!");
+	    	}
+            if(conn != null){
+            	stmt = conn.prepareStatement(query, ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_READ_ONLY);
+            	if (properties.length > 0){
+					Map<String, Property> paramMap = new HashMap<>();
+					List<String> paramList = new ArrayList<>();
+					for (Property prop : properties) {
+						paramMap.put(prop.getKey(), prop);
+						paramList.add(prop.getKey());
+					}
+					Object[] params = paramList.toArray();
+					stmt = bindValueToStatement(stmt, 1, params, paramMap);
+				}
+                rst = stmt.executeQuery();                 
+            }            
+        }catch(SQLException exp){
+            throw exp;
+        }catch(IllegalArgumentException iel){
+        	throw iel;
+        }finally{
+        	getStatementHolder().add(stmt);
+        }
+        return rst;           
+    }
+
+	/**
+     * 
+     * @param query
+     * @return
+     * @throws SQLException
+     * @throws IllegalArgumentException
+     */
+    
+    public ResultSet executeSelect(SQLSelectQuery query)
+    throws SQLException, IllegalArgumentException {
+    	
+        PreparedStatement stmt = null;
+        ResultSet rst=null;
+        String queryStr = query.toString(getDialect());
+        Row whereClause = query.getWhereProperties();
+        try{
+            if(conn != null && !conn.isClosed()){
+            	stmt = conn.prepareStatement(queryStr, ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_READ_ONLY);
+            	stmt = bindValueToStatement(stmt, 1, whereClause.getKeys(), whereClause.keyValueMap());
+        		rst = stmt.executeQuery();
+            }            
+        }catch(SQLException exp){
+            throw exp;
+        }catch(IllegalArgumentException iel){
+        	throw iel;
+        }finally{
+        	getStatementHolder().add(stmt);
+        }
+        return rst;           
+    }
+
+	public Table collection(ResultSet rst, String...columns){
+    	if(columns.length == 0) {
+    		return collection(rst);
+    	}
+		Table result = createTableFrom(rst, columns);
+    	return result;
+    }
+
+	protected Table createTableFrom(ResultSet rst, String[] columns) {
+		Table result = new Table();
+		result.setRows(createRowsFrom(rst, columns));
+		return result;
+	}
+
+	/**
+	 * 
+	 * @param rst
+	 * @return
+	 */
+    public Table collection(ResultSet rst){
+		Table result = createTableFrom(rst);
+		return result;
+	}
+
+	protected Table createTableFrom(ResultSet rst) {
+		Table result = new Table();
+		result.setRows(createRowsFrom(rst));
+		return result;
+	}
+
+	public List<Row> convertToLists(ResultSet rst){
+		List<Row> result = createRowsFrom(rst);
+		return result;
+	}
+
+	protected List<Row> createRowsFrom(ResultSet rst) {
+		List<Row> result = new ArrayList<Row>();
+		try{
+			//IF cursor is moved till last row. Then set to the above first row.
+			if(rst.getType() == ResultSet.TYPE_SCROLL_SENSITIVE && rst.isAfterLast()){
+                rst.beforeFirst();
+            }
+			ResultSetMetaData rsmd = rst.getMetaData();
+			int numCol = rsmd.getColumnCount();
+
+			while(rst.next()){ //For each Row
+				Row row = createRowFrom(rst, rsmd, numCol);
+				if(row.size() > 0)
+					result.add(row);
+			}
+		}catch(SQLException e){
+			result = null;
+            LOG.log(Level.WARNING, e.getMessage(), e);
+		}
+		return result;
+	}
+
+	protected List<Row> createRowsFrom(ResultSet rst, String...columns) {
+
+    	if (columns == null || columns.length == 0) return createRowsFrom(rst);
+
+		List<Row> result = new ArrayList<Row>();
+		try{
+			//IF cursor is moved till last row. Then set to the above first row.
+			if(rst.getType() == ResultSet.TYPE_SCROLL_SENSITIVE && rst.isAfterLast()){
+				rst.beforeFirst();
+			}
+			ResultSetMetaData rsmd = rst.getMetaData();
+
+			//Optimization
+			List<Integer> columnIndecies = new ArrayList<Integer>();
+			for(String columnName : columns){
+				columnIndecies.add(rst.findColumn(columnName));
+			}
+
+			while(rst.next()){ //For each Row
+				Row row = new Row();
+				for(int x : columnIndecies){ //For each column in the columns
+					Property property = createPropertyFrom(rst, rsmd, x);
+					row.add(property);
+				}
+				if(row.size() > 0)
+					result.add(row);
+			}
+		}catch(SQLException e){
+			result = null;
+            LOG.log(Level.WARNING, e.getMessage(), e);
+		}
+		return result;
+	}
+
+	protected Row createRowFrom(ResultSet rst, ResultSetMetaData rsmd, int numCol) throws SQLException {
+		Row row = new Row();
+		for(int x = 1; x <= numCol; x++){ //For each column in a Row
+			Property property = createPropertyFrom(rst, rsmd, x);
+			row.add(property);
+		}
+		return row;
+	}
+
+	protected Property createPropertyFrom(ResultSet rst, ResultSetMetaData rsmd, int x) throws SQLException {
+		String key = rsmd.getColumnLabel(x);
+		DataType type = convertDataType(rsmd.getColumnTypeName(x));
+		Object value = getValueFromResultSet(type, rst, x);
+		return new Property(key, value);
+	}
+
+	public List<Row> convertToLists(ResultSet rst, String...columns){
+		if(columns.length == 0){
+            return convertToLists(rst);
+        }
+		List<Row> result = createRowsFrom(rst, columns);
+		return result;
+	}
+	
+	public List<Map<String, Object>> convertToKeyValuePair(ResultSet rst){
+		
+		List<Map<String, Object>> result = new ArrayList<Map<String, Object>>();
+		try{
+			//IF cursor is moved till last row. Then set to the above first row. 
+			if(rst.getType() == ResultSet.TYPE_SCROLL_SENSITIVE && rst.isAfterLast()){
+                rst.beforeFirst();
+            }
+			
+			ResultSetMetaData rsmd = rst.getMetaData();
+			int numCol = rsmd.getColumnCount();
+			
+			while(rst.next()){ //For each Row
+				Map<String, Object> row = new HashMap<String, Object>(numCol);
+				for(int x = 1; x <= numCol; x++){ //For each column in a Row
+					String key = rsmd.getColumnLabel(x);
+					DataType type = convertDataType(rsmd.getColumnTypeName(x));
+					Object value = getValueFromResultSet(type, rst, x);
+					
+					row.put(key, value);
+				}
+				result.add(row);
+			}
+		}catch(SQLException e){
+			result = null;
+            LOG.log(Level.WARNING, e.getMessage(), e);
+		}
+		
+		return result;
+	}
+	
+	public List<Map<String, Object>> convertToKeyValuePair(ResultSet rst, List<String> paramProperties){
+		
+		if(paramProperties == null || paramProperties.size() <= 0){
+            return convertToKeyValuePair(rst);
+        }
+		
+		List<Map<String, Object>> result = new ArrayList<Map<String, Object>>();
+		try{
+			//IF cursor is moved till last row. Then set to the above first row. 
+			if(rst.getType() == ResultSet.TYPE_SCROLL_SENSITIVE && rst.isAfterLast()){
+                rst.beforeFirst();
+            }
+			
+			ResultSetMetaData rsmd = rst.getMetaData();
+
+			//Optimization
+            List<Integer> columnIndecies = new ArrayList<Integer>();
+            for(String columnName : paramProperties){
+                columnIndecies.add(rst.findColumn(columnName));
+            }
+			
+			while(rst.next()){ //For each Row
+				Map<String, Object> row = new HashMap<String, Object>(columnIndecies.size());
+				for(int x : columnIndecies){ //For each column in paramProperties
+					String key = rsmd.getColumnLabel(x);
+					DataType type = convertDataType(rsmd.getColumnTypeName(x));
+					Object value = getValueFromResultSet(type, rst, x);
+
+					row.put(key, value);
+				}
+				if(row.size() > 0)
+					result.add(row);
+			}
+		}catch(SQLException e){
+			result = null;
+            LOG.log(Level.WARNING, e.getMessage(), e);
+		}
+		
+		return result;
+	}
+	
+	public List<Map<String, Object>> convertToKeyValuePair(ResultSet rst, List<String> paramProperties, List<String> paramPropertyNames){
+		
+		if(paramProperties == null 
+				|| paramProperties.size() <= 0){
+			return convertToKeyValuePair(rst);
+		}
+		if(paramPropertyNames == null
+				|| paramPropertyNames.size() <= 0
+				|| paramProperties.size() != paramPropertyNames.size()){
+			return convertToKeyValuePair(rst, paramProperties);
+		}
+		
+		List<Map<String, Object>> result = new ArrayList<Map<String, Object>>();
+		try{
+			
+			if(rst.getType() == ResultSet.TYPE_SCROLL_SENSITIVE && rst.isAfterLast()){
+				rst.beforeFirst();
+			}
+			
+			ResultSetMetaData rsmd = rst.getMetaData();
+			List<Integer> columnIndices = new ArrayList<Integer>(paramProperties.size());
+			for(String columnName : paramProperties){
+				columnIndices.add(rst.findColumn(columnName));
+			}
+			
+			while(rst.next()){ //For each Row
+				HashMap<String, Object> row = new HashMap<String, Object>(columnIndices.size());
+				int newNameCount = 0;
+				for(int x : columnIndices){ //For each column in paramProperties
+					String key = paramPropertyNames.get(newNameCount++);
+					DataType type = convertDataType(rsmd.getColumnTypeName(x));
+					Object value = getValueFromResultSet(type, rst, x);
+					
+					row.put(key, value);
+				}
+				result.add(row);
+			}
+		}catch(SQLException e){
+			result = null;
+            LOG.log(Level.WARNING, e.getMessage(), e);
+		}
+		
+		return result;
+	}
+
+	public Map<String, List<Map<String, Object>>> groupBy(String key, List<Map<String, Object>> rows) {
+		Map<String, List<Map<String, Object>>> results = new ConcurrentHashMap<>();
+		for (Map<String, Object> map : rows) {
+			String theKey = map.get(key).toString(); //key's value going to be the results-key
+			List<Map<String, Object>> items = results.get(theKey);
+			if (items == null) {
+				items = new ArrayList<>();
+				results.put(theKey, items);
+			}
+			items.add(map);
+		}
+		return results;
+	}
+
+	public <T extends Entity> Map<String, List<T>> groupBy(String key, List<Map<String, Object>> rows, Class<T> clType) {
+		Map<String, List<T>> results = new ConcurrentHashMap<>();
+		for (Map<String, Object> map : rows) {
+			try {
+				String theKey = map.get(key).toString(); //key's value going to be the results-key
+				List<T> items = results.get(theKey);
+				if (items == null) {
+					items = new ArrayList<>();
+					results.put(theKey, items);
+				}
+				//
+				Entity test = clType.newInstance();
+				test.unmarshallingFromMap(map, true);
+				items.add((T) test);
+			} catch (InstantiationException e) {
+				e.printStackTrace();
+			} catch (IllegalAccessException e) {
+				e.printStackTrace();
+			}
+		}
+		return results;
+	}
+	
+	public Map<Object, Map<String, Object>> convertToIndexedKeyValuePair(ResultSet rst, String indexColumn){
+		
+		Map<Object, Map<String, Object>> result = new HashMap<Object, Map<String, Object>>();
+		try{
+			//IF cursor is moved till last row. Then set to the above first row. 
+			if(rst.getType() == ResultSet.TYPE_SCROLL_SENSITIVE && rst.isAfterLast()){
+                rst.beforeFirst();
+            }
+			
+			ResultSetMetaData rsmd = rst.getMetaData();
+			int numCol = rsmd.getColumnCount();
+			
+			while(rst.next()){ //For each Row
+				
+				Object indexColValue = null;
+				Map<String, Object> row = new HashMap<String, Object>(numCol);
+				for(int x = 1; x <= numCol; x++){ //For each column in a Row
+					
+					String key = rsmd.getColumnLabel(x);
+					DataType type = convertDataType(rsmd.getColumnTypeName(x));
+					Object value = getValueFromResultSet(type, rst, x);
+					
+					if(key.equals(indexColumn))
+						indexColValue = value;
+					row.put(key, value);
+				}
+				if(indexColValue != null
+						&& !result.containsKey(indexColValue))
+					result.put(indexColValue,row);
+				
+			}
+		}catch(SQLException e){
+			result = null;
+            LOG.log(Level.WARNING, e.getMessage(), e);
+		}
+		
+		return result;
+	}
+	
+	public Map<Object, Map<String, Object>> convertToIndexedKeyValuePair(ResultSet rst, String indexColumn, List<String> paramProperties){
+		
+		if(paramProperties == null || paramProperties.size() <= 0){
+            return convertToIndexedKeyValuePair(rst, indexColumn);
+        }
+		
+		Map<Object, Map<String, Object>> result = new HashMap<Object, Map<String, Object>>();
+		try{
+			
+			//IF cursor is moved till last row. Then set to the above first row. 
+			if(rst.getType() == ResultSet.TYPE_SCROLL_SENSITIVE && rst.isAfterLast()){
+                rst.beforeFirst();
+            }
+			
+			ResultSetMetaData rsmd = rst.getMetaData();
+			
+			//Optimization
+            List<Integer> columnIndecies = new ArrayList<Integer>();
+            for(String columnName : paramProperties){
+                columnIndecies.add(rst.findColumn(columnName));
+            }
+			
+			while(rst.next()){ //For each Row
+				
+				Object indexColValue = null;
+				Map<String, Object> row = new HashMap<String, Object>(columnIndecies.size());
+				for(int x : columnIndecies){ //For each column in the paramProperties
+					
+					String key = rsmd.getColumnLabel(x);
+					DataType type = convertDataType(rsmd
+							.getColumnTypeName(x));
+					Object value = getValueFromResultSet(type, rst, x);
+
+					if (key.equals(indexColumn))
+						indexColValue = value;
+					row.put(key, value);
+
+				}
+				if(indexColValue != null
+						&& !result.containsKey(indexColValue)
+						&& row.size() > 0)
+					result.put(indexColValue,row);
+				
+			}
+		}catch(SQLException e){
+			result = null;
+            LOG.log(Level.WARNING, e.getMessage(), e);
+		}
+		
+		return result;
+	}
+	
+	public Map<Object, Map<String, Object>> convertToIndexedKeyValuePair(ResultSet rst, String indexColumn, List<String> paramProperties, List<String> paramPropertyNames){
+		
+		if(paramProperties == null 
+				|| paramProperties.size() <= 0){
+			return convertToIndexedKeyValuePair(rst, indexColumn);
+		}
+		if(paramPropertyNames == null
+				|| paramPropertyNames.size() <= 0
+				|| paramProperties.size() != paramPropertyNames.size()){
+			return convertToIndexedKeyValuePair(rst, indexColumn, paramProperties);
+		}
+		
+		Map<Object, Map<String, Object>> result = new HashMap<Object, Map<String, Object>>();
+		
+		try{
+			
+			if(rst.getType() == ResultSet.TYPE_SCROLL_SENSITIVE && rst.isAfterLast()){
+				rst.beforeFirst();
+			}
+			
+			ResultSetMetaData rsmd = rst.getMetaData();
+			List<Integer> columnIndices = new ArrayList<Integer>();
+			for(String columnName : paramProperties){
+				columnIndices.add(rst.findColumn(columnName));
+			}
+			
+			while(rst.next()){ //For each Row
+				
+				Object indexColValue = null;
+				
+				HashMap<String, Object> row = new HashMap<String, Object>(columnIndices.size());
+				int newNameCount = 0;
+				for(int x : columnIndices){ //For each column in paramProperties
+					
+					String key = rsmd.getColumnLabel(x);
+					String keyConverted = paramPropertyNames.get(newNameCount++);
+					DataType type = convertDataType(rsmd.getColumnTypeName(x));
+					Object value = getValueFromResultSet(type, rst, x);
+					
+					if(key.equals(indexColumn))
+						indexColValue = value;
+					row.put(keyConverted, value);
+
+				}
+				if(indexColValue != null
+						&& !result.containsKey(indexColValue))
+					result.put(indexColValue,row);
+				
+			}
+		}catch(SQLException e){
+			result = null;
+            LOG.log(Level.WARNING, e.getMessage(), e);
+		}
+		
+		return result;
+	}
+	
+	/**
+	 * 
+	 * @param rst
+	 * @param rowIndex > 0
+	 * @return
+	 */
+	
+	public Row retrieveRow(ResultSet rst, int rowIndex){
+        Row result = null;
+        try{
+            ResultSetMetaData rsmd = rst.getMetaData();
+            int numCol = rsmd.getColumnCount();
+            if(rst.getType() == ResultSet.TYPE_SCROLL_SENSITIVE){
+            	
+                int offset = (rowIndex <= 0) ? 1 : rowIndex;
+                rst.absolute(offset);
+                Row row = new Row();
+                
+                for(int x = 1; x <= numCol; x++){ //For each column in a Row
+                    Property property = createPropertyFrom(rst, rsmd, x);
+                    row.add(property);
+                }
+                result = row;
+            }else{
+                if(!rst.isAfterLast()){
+                    while(rst.next()){
+                        if(rowIndex == rst.getRow()){
+                            Row row = new Row();
+                            for(int x = 1; x <= numCol; x++){ //For each column in a Row
+								Property property = createPropertyFrom(rst, rsmd, x);
+                                row.add(property);
+                            }
+                            result = row;
+                            break;
+                        }
+                    }//end while
+                }
+            }//
+        }catch(SQLException e){
+            result = null;
+            LOG.log(Level.WARNING, e.getMessage(), e);
+        }
+        return result;
+    }
+	
+	public Row retrieveColumn(ResultSet rst, String indexColumn){
+		
+		Row result = new Row();
+		
+		try{
+			
+			//IF cursor is moved till last row. Then set to the above first row. 
+			if(rst.getType() == ResultSet.TYPE_SCROLL_SENSITIVE && rst.isAfterLast()){
+                rst.beforeFirst();
+            }
+			
+			ResultSetMetaData rsmd = rst.getMetaData();
+			int x = (rst.findColumn(indexColumn) <= 0) ? 1 : rst.findColumn(indexColumn);
+			
+			String key = rsmd.getColumnLabel(x);
+			DataType type = convertDataType(rsmd.getColumnTypeName(x));
+			
+			while(rst.next()){ //For each Row
+				Object value = getValueFromResultSet(type, rst, x);
+				Property prop = new Property(key,value);
+				result.add(prop);
+			}
+		}catch(SQLException e){
+			result = null;
+            LOG.log(Level.WARNING, e.getMessage(), e);
+		}
+		return result;
+	}
+	
+	public Row retrieveColumn(ResultSet rst, int indexColumn){
+		
+		Row result = new Row();
+		
+		try{
+			//IF cursor is moved till last row. Then set to the above first row. 
+			if(rst.getType() == ResultSet.TYPE_SCROLL_SENSITIVE && rst.isAfterLast()){
+                rst.beforeFirst();
+            }
+			
+			ResultSetMetaData rsmd = rst.getMetaData();
+			int numCol = rsmd.getColumnCount();
+			
+			int x = 1;
+			if( 1 <= indexColumn && indexColumn <= numCol){
+				x = indexColumn;
+			}
+			
+			String key = rsmd.getColumnLabel(x);
+			DataType type = convertDataType(rsmd.getColumnTypeName(x));
+			
+			while(rst.next()){ //For each Row
+				Object value = getValueFromResultSet(type, rst, x);
+				Property prop = new Property(key, value);
+				result.add(prop);
+			}
+		}catch(SQLException e){
+			result = null;
+            LOG.log(Level.WARNING, e.getMessage(), e);
+		}
+		return result;
+	}
+	
+	public Object createBlob(String val) throws SQLException {
+		byte[] bytes = val.getBytes();
+		Blob blob = conn.createBlob();
+		blob.setBytes(1, bytes);
+		return blob;
+	}
+	
+	/*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>Private Methods>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>*/
+	
+	private PreparedStatement bindValueToStatement(PreparedStatement stmt
+			, int startIndex
+			, Object[] params
+			, Map<String, Property> paramValues)
+    throws SQLException, IllegalArgumentException {
+    	
+    	try{
+    		if(params == null) return stmt;
+    		if(params.length == paramValues.size()){
+            	
+            	if(stmt != null){
+            		int index = 1;
+            		if(startIndex > 0){
+            			index = startIndex;
+            		}else{
+            			throw new IllegalArgumentException("Index Out Of Bound!!!");
+            		}
+            		for (Object param : params) {
+            			
+            			Property property = paramValues.get(param.toString());
+            			if (property.getType() == DataType.NULL_SKIP)
+            			    continue;
+
+            			switch (property.getType()) {
+	            			case STRING:
+	            				stmt.setString(index++, (property.getValue() != null)
+                                        ? property.getValue().toString().trim()
+                                        : null);
+	            				break;
+	            			case INT:
+	            				if(property.getValue() != null){
+	            					stmt.setInt(index++, (Integer)property.getValue());
+	            				}else{
+	            					stmt.setNull(index++, Types.INTEGER);
+	            				}
+	            				break;
+                            case LONG:
+                                if(property.getValue() != null){
+                                    stmt.setLong(index++, (Long)property.getValue());
+                                }else{
+                                    stmt.setNull(index++, Types.BIGINT);
+                                }
+                                break;
+	            			case BOOL:
+	            				if(property.getValue() != null){
+	            					boolean res = Boolean.valueOf(property.getValue().toString()) ? true : false;
+                                    stmt.setBoolean(index++, res);
+                                }else{
+                                    stmt.setBoolean(index++, false);
+                                }
+	            				break;
+	            			case FLOAT:
+	            				if(property.getValue() != null){
+	            					stmt.setFloat(index++, (Float)property.getValue());
+	            				}else{
+	            					stmt.setNull(index++, Types.FLOAT);
+	            				}
+	            				break;
+	            			case DOUBLE:
+	            				if(property.getValue() != null){
+	            					stmt.setDouble(index++, (Double)property.getValue());
+	            				}else{
+	            					stmt.setNull(index++, Types.DOUBLE);
+	            				}
+	            				break;
+	            			case SQLDATE:
+	            			case SQLTIMESTAMP:
+	            				if(property.getValue() != null) {
+	            					if(property.getValue() instanceof Timestamp) {
+	            						stmt.setTimestamp(index++, (Timestamp)property.getValue());
+	            					}else if(property.getValue() instanceof Time) {
+	            						stmt.setTime(index++, (Time)property.getValue());
+	            					}else {
+	            						stmt.setDate(index++, (Date)property.getValue());
+	            					}
+	            				}else {
+	            					stmt.setNull(index++, Types.DATE);
+	            				}
+	            				break;
+	            			case BLOB:
+	            				if(property.getValue() != null && property.getValue() instanceof Blob){
+	            					stmt.setBlob(index++, (Blob)property.getValue());
+	            				}else if(property.getValue() != null && property.getValue() instanceof String){
+	            					byte[] bytes = property.getValue().toString().getBytes();
+	            					Blob blob = conn.createBlob();
+	            					blob.setBytes(1, bytes);
+	            					stmt.setBlob(index++, blob);
+	            				}
+	            				else{
+	            					stmt.setNull(index++, Types.BLOB);
+	            				}
+	            				break;
+	            			case BYTEARRAY:
+	            				if(property.getValue() != null && property.getValue() instanceof Byte){
+                                    stmt.setBytes(index++, (byte[])property.getValue());
+                                }else if(property.getValue() != null && property.getValue() instanceof String){
+                                    stmt.setBytes(index++, ((String)property.getValue()).getBytes());
+                                }else if(property.getValue() != null){
+                                    stmt.setBytes(index++, (byte[])property.getValue());
+                                }else{
+                                    stmt.setNull(index++, Types.ARRAY);
+                                }
+	            				break;
+                            case LIST:
+                                if (property.getValue() != null){
+                                    List items = (List) property.getValue();
+                                    Object obj = (items.size() > 0) ? items.get(0) : "";
+                                    if (obj instanceof Integer){
+                                        stmt.setArray(index++, conn.createArrayOf("integer", items.toArray(new Integer[0])));
+                                    }
+                                    else if (obj instanceof Double){
+                                        stmt.setArray(index++, conn.createArrayOf("double", items.toArray(new Double[0])));
+                                    }
+                                    else if (obj instanceof Float){
+                                        stmt.setArray(index++, conn.createArrayOf("float", items.toArray(new Float[0])));
+                                    }
+                                    else if (obj instanceof Long){
+                                        stmt.setArray(index++, conn.createArrayOf("long", items.toArray(new Long[0])));
+                                    }
+                                    else if((obj instanceof Timestamp)
+                                            || (obj instanceof Time)
+                                            || obj instanceof Date){
+                                        stmt.setArray(index++, conn.createArrayOf("timestamp", items.toArray()));
+                                    }
+                                    else if(obj instanceof String) {
+                                        stmt.setArray(index++, conn.createArrayOf("string", items.toArray(new String[0])));
+                                    }
+                                    else {
+                                        stmt.setArray(index++, conn.createArrayOf("object", items.toArray()));
+                                    }
+                                }else{
+                                    stmt.setNull(index++, Types.ARRAY);
+                                }
+                                break;
+	            			default:
+	            				if(property.getValue() != null)
+	            				    stmt.setObject(index++, property.getValue());
+	            				else
+	            				    stmt.setNull(index++, Types.NULL);
+	            				break;
+            			}
+            		}
+            	}
+            }else{
+            	throw new IllegalArgumentException("Parameter length mismatch");
+            }
+    	}catch(SQLException exp){
+    		throw exp;
+    	}
+    	return stmt;
+    }
+	
+	protected Object getValueFromResultSet(DataType type, ResultSet rst, int index)
+	throws SQLException {
+		
+		Object value = null;
+		switch (type) {
+		case INT:
+			value = new Integer(rst.getInt(index));
+			break;
+		case DOUBLE:
+			value = new Double(rst.getDouble(index));
+			break;
+		case FLOAT:
+			value = new Float(rst.getFloat(index));
+			break;
+		case STRING:
+			value = rst.getString(index);
+			break;
+		case BOOL:
+			value = new Boolean(rst.getBoolean(index));
+			break;
+		case SQLDATE:
+			value = rst.getDate(index);
+			break;
+		case SQLTIMESTAMP:
+			value = rst.getTimestamp(index);
+			break;
+		case BYTEARRAY:
+			byte[] arr = rst.getBytes(index); 
+			value = arr;
+			break;
+		default:
+			value = rst.getObject(index);
+			break;
+		}
+		return value;
+	}
+
+	//////////////////////////////////////END//////////////////////////////////////
+}

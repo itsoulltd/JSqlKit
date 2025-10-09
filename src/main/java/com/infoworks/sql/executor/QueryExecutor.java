@@ -1,0 +1,41 @@
+package com.infoworks.sql.executor;
+
+import com.infoworks.connect.DriverClass;
+import com.infoworks.entity.Entity;
+import com.infoworks.sql.query.QueryType;
+import com.infoworks.sql.query.SQLQuery;
+import com.infoworks.sql.query.builder.AbstractQueryBuilder;
+import com.infoworks.sql.query.models.Row;
+
+import java.sql.SQLException;
+import java.util.List;
+import java.util.Map;
+
+public interface QueryExecutor<S extends SQLQuery
+        , I extends SQLQuery
+        , U extends SQLQuery
+        , D extends SQLQuery
+        , C extends SQLQuery> extends QueryTransaction {
+
+    AbstractQueryBuilder createQueryBuilder(QueryType queryType);
+    Object createBlob(String val) throws SQLException;
+    Boolean executeDDLQuery(String query) throws SQLException;
+
+    Integer executeUpdate(U query) throws SQLException;
+    Integer[] executeUpdate(int size, List<U> queries) throws SQLException, IllegalArgumentException;
+
+    Integer executeDelete(D deleteQuery) throws SQLException;
+    Integer executeDelete(int size, D deleteQuery, List<Row> where) throws SQLException;
+
+    Integer executeInsert(boolean autoId, I insertQuery) throws SQLException, IllegalArgumentException;
+    Integer[] executeInsert(boolean autoId, int size, I insertQuery, List<Row> rows) throws SQLException, IllegalArgumentException;
+
+    Integer getScalarValue(C scalarQuery) throws SQLException;
+
+    <T extends Entity> List<T> executeSelect(String query, Class<T> type, Map<String, String> mappingKeys) throws SQLException, IllegalArgumentException, IllegalAccessException, InstantiationException;
+    <T extends Entity> List<T> executeSelect(S query, Class<T> type, Map<String, String> mappingKeys) throws SQLException, IllegalArgumentException, IllegalAccessException, InstantiationException;
+
+    <T extends Entity> List<T> executeCRUDQuery(String query, Class<T> type) throws SQLException, IllegalAccessException, InstantiationException;
+
+    DriverClass getDialect();
+}
