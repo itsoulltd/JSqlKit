@@ -21,7 +21,7 @@ public class SQLConnectorTest {
 
     @Test
     public void h2DbNewOrExistFileConnectionTest() {
-        try(Connection connection = SQLConnector.createConnection(DriverClass.H2_FILE, "testH2DB")) {
+        try(Connection connection = SQLConnector.createConnection(DriverClass.H2_FILE, "testDB")) {
             Assert.assertTrue(connection != null);
             System.out.println("Connection was created.");
         } catch (SQLException e) {
@@ -31,7 +31,7 @@ public class SQLConnectorTest {
 
     @Test
     public void h2DbNewOrExistFileAsPathConnectionTest() {
-        try(Connection connection = SQLConnector.createConnection(DriverClass.H2_FILE, "../../target/testH2DB")) {
+        try(Connection connection = SQLConnector.createConnection(DriverClass.H2_FILE, "../../target/testDB")) {
             Assert.assertTrue(connection != null);
             System.out.println("Connection was created.");
         } catch (SQLException e) {

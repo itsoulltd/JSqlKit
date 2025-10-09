@@ -35,7 +35,7 @@ public class JDBConnectorTest {
 		try {
 			conn = new JDBConnection.Builder(DriverClass.H2_EMBEDDED)
 					.database("testDB")
-					.credential("root", "root@123")
+					.credential("sa", "sa")
 					.build();
 
 		} catch (Exception e) {
