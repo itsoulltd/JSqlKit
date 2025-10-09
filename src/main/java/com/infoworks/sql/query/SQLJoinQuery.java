@@ -1,8 +1,8 @@
 package com.infoworks.sql.query;
 
 import com.infoworks.connect.DriverClass;
-import com.infoworks.sql.query.models.ExpressionInterpreter;
-import com.infoworks.sql.query.models.JoinExpression;
+import com.infoworks.sql.query.models.Expression;
+import com.infoworks.sql.query.models.Join;
 import com.infoworks.sql.query.models.Operator;
 
 import java.util.ArrayList;
@@ -90,7 +90,7 @@ public class SQLJoinQuery extends SQLSelectQuery {
 	}
 
 	private void appendWhere(StringBuffer buffer) {
-		ExpressionInterpreter interpreter = super.getWhereExpression();
+		Expression interpreter = super.getWhereExpression();
 		if(interpreter != null)
 			buffer.append(" WHERE " + interpreter.interpret());
 	}
@@ -133,12 +133,12 @@ public class SQLJoinQuery extends SQLSelectQuery {
 		this.groupByList = columns;
 	}
 
-	public void setHavingExpression(ExpressionInterpreter interpreter) {
+	public void setHavingExpression(Expression interpreter) {
 		this.havingInterpreter = interpreter;
 	}
 
 	@Override
-	public void setWhereExpression(ExpressionInterpreter whereExpression) {
+	public void setWhereExpression(Expression whereExpression) {
 		super.setWhereExpression(whereExpression);
 	}
 	
@@ -163,7 +163,7 @@ public class SQLJoinQuery extends SQLSelectQuery {
 	
 	private JoinTable previousTable;
 	
-	public void setJoinExpression(JoinExpression exp) {
+	public void setJoinExpression(Join exp) {
 		if(previousTable != null) {
 			previousTable.setExpression(exp);
 			exp.setLeftTable(previousTable.getName());
@@ -177,7 +177,7 @@ public class SQLJoinQuery extends SQLSelectQuery {
 		}
 		tables.add(jTable);
 		if(previousTable != null) {
-			JoinExpression cExp = previousTable.getExpression(); 
+			Join cExp = previousTable.getExpression();
 			cExp.setRightTable(jTable.getName());
 			previousTable.join(jTable);
 		}
@@ -205,7 +205,7 @@ public class SQLJoinQuery extends SQLSelectQuery {
 		private String name = "";
 		private String alice = "";
 		private List<String> columns = new ArrayList<>();
-		private JoinExpression expression;
+		private Join expression;
 		private JoinTable tail;
 
 		public JoinTable(String name, String alice) {
@@ -230,10 +230,10 @@ public class SQLJoinQuery extends SQLSelectQuery {
 			if(count == 0){buffer.append(getName()+"."+STARIC);}
 			return buffer.toString();
 		}
-		public void setExpression(JoinExpression expression) {
+		public void setExpression(Join expression) {
 			this.expression = expression;
 		}
-		public JoinExpression getExpression() {
+		public Join getExpression() {
 			return expression;
 		}
 		public String getName() {

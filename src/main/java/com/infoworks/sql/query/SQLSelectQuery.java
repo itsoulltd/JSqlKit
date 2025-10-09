@@ -15,7 +15,7 @@ public class SQLSelectQuery extends SQLQuery{
 	protected Integer offset = 0;
 	protected List<String> orderByList;
 	protected List<String> groupByList;
-	protected ExpressionInterpreter havingInterpreter;
+	protected Expression havingInterpreter;
 	private char quantifier = ' '; //Default is empty space
 	
 	public SQLSelectQuery() {
@@ -120,7 +120,7 @@ public class SQLSelectQuery extends SQLQuery{
 		}
 	}
 	
-	public void setHavingExpression(ExpressionInterpreter interpreter) {
+	public void setHavingExpression(Expression interpreter) {
 		this.havingInterpreter = interpreter;
 		pqlBuffer.append(" HAVING " + interpreter.interpret());
 	}
@@ -128,10 +128,10 @@ public class SQLSelectQuery extends SQLQuery{
 	@Override
 	public Row getWhereProperties() {
 		if(havingInterpreter != null) {
-			List<Expression> expressions = (super.getWhereParamExpressions() != null)
+			List<ExpressionProxy> expressions = (super.getWhereParamExpressions() != null)
 					? new ArrayList<>(super.getWhereParamExpressions())
 					: new ArrayList<>();
-			expressions.addAll(Arrays.asList(havingInterpreter.resolveExpressions()));
+			expressions.addAll(Arrays.asList(havingInterpreter.resolve()));
 			super.setWhereParamExpressions(expressions);
 		}
 		return super.getWhereProperties();
@@ -175,17 +175,17 @@ public class SQLSelectQuery extends SQLQuery{
 	}
 	
 	protected void prepareWhereParams(String[] whereParams) {
-		prepareWhereParams(Expression.createListFrom(whereParams, Operator.EQUAL));
+		prepareWhereParams(ExpressionProxy.createListFrom(whereParams, Operator.EQUAL));
 	}
 	
 	@Override
-	public void setWhereParamExpressions(List<Expression> whereParams) {
+	public void setWhereParamExpressions(List<ExpressionProxy> whereParams) {
 		super.setWhereParamExpressions(whereParams);
 		prepareWhereParams(whereParams);
 	}
 
 	@SuppressWarnings("Duplicates")
-	protected void prepareWhereParams(List<Expression> whereParams) {
+	protected void prepareWhereParams(List<ExpressionProxy> whereParams) {
 		if(whereParams != null 
 				&& whereParams.size() > 0
 				&& !isAllParamEmpty(whereParams.toArray())){
@@ -193,7 +193,7 @@ public class SQLSelectQuery extends SQLQuery{
 			if(pqlBuffer.length() > 0){
 				pqlBuffer.append("WHERE ");
 				int count = 0;
-				for(Expression param : whereParams){
+				for(ExpressionProxy param : whereParams){
 					if(param.getProperty().trim().equals("")){continue;}
 					if(count++ != 0){pqlBuffer.append( " " + getLogic().name() + " ");}
 					pqlBuffer.append(param.getProperty() + " " + param.getType().toString() + " " + MARKER);
@@ -203,18 +203,18 @@ public class SQLSelectQuery extends SQLQuery{
 	}
 	
 	@Override
-	public void setWhereExpression(ExpressionInterpreter whereExpression) {
+	public void setWhereExpression(Expression whereExpression) {
 		super.setWhereExpression(whereExpression);
 		prepareWhereExpression(whereExpression);
 	}
 	
-	protected void prepareWhereExpression(ExpressionInterpreter whereExpression){
+	protected void prepareWhereExpression(Expression whereExpression){
 		pqlBuffer.append("WHERE " + whereExpression.interpret());
 	}
 
 	@Deprecated
     @SuppressWarnings("Duplicates")
-	public static String create(String tableName, String[]projectionParams, Logic whereLogic, List<Expression> whereParams)
+	public static String create(String tableName, String[]projectionParams, Logic whereLogic, List<ExpressionProxy> whereParams)
 			throws IllegalArgumentException {
 
 		//Query Builders
@@ -229,7 +229,7 @@ public class SQLSelectQuery extends SQLQuery{
 			if(pqlBuffer.length() > 0){
 				pqlBuffer.append(" WHERE ");
 				int count = 0;
-				for(Expression param : whereParams){
+				for(ExpressionProxy param : whereParams){
 					if(param.getProperty().trim().equals("")){continue;}
 					if(count++ != 0){pqlBuffer.append( " " + whereLogic.name() + " ");}
 					pqlBuffer.append(param.getProperty() + " " + param.getType().toString() + " " + MARKER);
@@ -244,7 +244,7 @@ public class SQLSelectQuery extends SQLQuery{
     @SuppressWarnings("Duplicates")
 	public static String create(String tableName, String[]projectionParams, Logic whereLogic, String[] whereParams)
 			throws IllegalArgumentException {
-		return SQLSelectQuery.create(tableName, projectionParams, whereLogic, Expression.createListFrom(whereParams, Operator.EQUAL));
+		return SQLSelectQuery.create(tableName, projectionParams, whereLogic, ExpressionProxy.createListFrom(whereParams, Operator.EQUAL));
 	}
 
     @Deprecated

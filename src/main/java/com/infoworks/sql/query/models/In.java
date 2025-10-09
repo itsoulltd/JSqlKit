@@ -5,12 +5,12 @@ import com.infoworks.orm.Property;
 
 import java.util.List;
 
-public class InExpression extends Expression {
-    public InExpression(Property property, Operator type) {
+public class In extends ExpressionProxy {
+    public In(Property property, Operator type) {
         super(property, type);
     }
 
-    public InExpression(String property, Operator type) {
+    public In(String property, Operator type) {
         super(property, type);
     }
 

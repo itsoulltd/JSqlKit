@@ -153,7 +153,7 @@ public class QueryExecutionTest {
 			SQLScalarQuery max = (SQLScalarQuery) new SQLQuery.Builder(QueryType.MAX).columns("id").on("Passenger").build();
 			int autoId = exe.getScalarValue(max);
 			if (autoId > 0){
-				Expression compareWith = new Expression("id", Operator.EQUAL).setPropertyValue(autoId, DataType.INT);
+				ExpressionProxy compareWith = new ExpressionProxy("id", Operator.EQUAL).setPropertyValue(autoId, DataType.INT);
 
 				SQLDeleteQuery dquery = (SQLDeleteQuery) new SQLQuery.Builder(QueryType.DELETE)
 						.rowsFrom("Passenger")
@@ -175,7 +175,7 @@ public class QueryExecutionTest {
 				.columns("name",ScalarType.COUNT.toAlias("age"))
 				.from("Passenger")
 				.groupBy("name")
-				.having(new Expression(ScalarType.COUNT.toString("age"), Operator.GREATER_THAN).setPropertyValue(1, DataType.INT))
+				.having(new ExpressionProxy(ScalarType.COUNT.toString("age"), Operator.GREATER_THAN).setPropertyValue(1, DataType.INT))
 				.orderBy(ScalarType.COUNT.toString("age"))
 				.build();
 

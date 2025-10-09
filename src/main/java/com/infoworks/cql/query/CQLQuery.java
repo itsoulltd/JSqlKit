@@ -3,7 +3,7 @@ package com.infoworks.cql.query;
 import com.infoworks.sql.query.QueryType;
 import com.infoworks.sql.query.SQLQuery;
 import com.infoworks.sql.query.builder.*;
-import com.infoworks.sql.query.models.ExpressionInterpreter;
+import com.infoworks.sql.query.models.Expression;
 
 public class CQLQuery extends SQLQuery {
 
@@ -59,7 +59,7 @@ public class CQLQuery extends SQLQuery {
         }
 
         @Override
-        public OrderByBuilder having(ExpressionInterpreter expression) {
+        public OrderByBuilder having(Expression expression) {
             return this;
         }
     }

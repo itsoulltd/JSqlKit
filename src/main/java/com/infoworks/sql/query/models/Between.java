@@ -2,7 +2,7 @@ package com.infoworks.sql.query.models;
 
 import com.infoworks.orm.Property;
 
-public class BtwExpression extends Expression {
+public class Between extends ExpressionProxy {
 
     private Property secondValueProperty;
 
@@ -10,7 +10,7 @@ public class BtwExpression extends Expression {
         return secondValueProperty;
     }
 
-    public BtwExpression(Property first, Property second, Operator type) {
+    public Between(Property first, Property second, Operator type) {
         super(first, type);
         this.secondValueProperty = second;
     }
@@ -29,8 +29,8 @@ public class BtwExpression extends Expression {
     }
 
     @Override
-    public Expression[] resolveExpressions() {
-        return new Expression[] {this, new Expression(getSecondValueProperty(), getType())};
+    public ExpressionProxy[] resolve() {
+        return new ExpressionProxy[] {this, new ExpressionProxy(getSecondValueProperty(), getType())};
     }
 
 }

@@ -30,26 +30,26 @@ public abstract class SQLQuery {
 	
 	//////////////////////////////////SQLQuery///////////////////////////////////////////
 	
-	public ExpressionInterpreter getWhereExpression() {
+	public Expression getWhereExpression() {
 		return whereExpression;
 	}
 
-	public void setWhereExpression(ExpressionInterpreter whereExpression) {
+	public void setWhereExpression(Expression whereExpression) {
 		this.whereExpression = whereExpression;
-		Expression[] comps = whereExpression.resolveExpressions();
+		ExpressionProxy[] comps = whereExpression.resolve();
 		this.whereParamExpressions = Arrays.asList(comps);
 	}
 	
-	public List<Expression> getWhereParamExpressions() {
+	public List<ExpressionProxy> getWhereParamExpressions() {
 		return whereParamExpressions;
 	}
 	
-	public void setWhereParamExpressions(List<Expression> params) {
+	public void setWhereParamExpressions(List<ExpressionProxy> params) {
 		this.whereParamExpressions = params;
 	}
 	
 	public Row getWhereProperties() {
-		return Expression.convertToRow(whereParamExpressions);
+		return ExpressionProxy.convertToRow(whereParamExpressions);
 	}
 
 	public static boolean isAllParamEmpty(Object[]paramList){
@@ -75,9 +75,9 @@ public abstract class SQLQuery {
 	public void setWhereParams(String[] whereParams) {
 		this.whereParams = whereParams;
 		if(whereParamExpressions == null){
-			whereParamExpressions = new ArrayList<Expression>();
+			whereParamExpressions = new ArrayList<ExpressionProxy>();
 			for (String params : whereParams) {
-				whereParamExpressions.add(new Expression(params, Operator.EQUAL));
+				whereParamExpressions.add(new ExpressionProxy(params, Operator.EQUAL));
 			}
 		}
 	}
@@ -121,8 +121,8 @@ public abstract class SQLQuery {
 	private String[] columns;
 	private String[] whereParams;
 	private Logic logic = Logic.AND;
-	private List<Expression> whereParamExpressions;
-	private ExpressionInterpreter whereExpression;
+	private List<ExpressionProxy> whereParamExpressions;
+	private Expression whereExpression;
 
     protected StringBuffer bindValueToQueryBuffer(StringBuffer buffer, Row row){
         String[] keySet = row.getKeys();

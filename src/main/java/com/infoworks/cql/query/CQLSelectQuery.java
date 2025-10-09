@@ -2,12 +2,12 @@ package com.infoworks.cql.query;
 
 import com.infoworks.connect.DriverClass;
 import com.infoworks.sql.query.SQLSelectQuery;
-import com.infoworks.sql.query.models.ExpressionInterpreter;
+import com.infoworks.sql.query.models.Expression;
 
 public class CQLSelectQuery extends SQLSelectQuery {
 
     @Override
-    protected void prepareWhereExpression(ExpressionInterpreter whereExpression) {
+    protected void prepareWhereExpression(Expression whereExpression) {
         //FIXME:
         String clause = whereExpression.interpret();
         clause = clause.replace("(", "");

@@ -8,7 +8,7 @@ import com.infoworks.sql.executor.SQLExecutor;
 import com.infoworks.sql.query.QueryType;
 import com.infoworks.sql.query.SQLQuery;
 import com.infoworks.sql.query.SQLScalarQuery;
-import com.infoworks.sql.query.models.ExpressionInterpreter;
+import com.infoworks.sql.query.models.Expression;
 import com.infoworks.sql.query.models.Predicate;
 import com.infoworks.orm.Row;
 import com.infoworks.sql.query.models.Where;
@@ -92,7 +92,7 @@ public class EntityCRUDTest {
         }
     }
 
-    private int getCount(Class<? extends Entity> entityType, SQLExecutor executor, ExpressionInterpreter expression) throws SQLException {
+    private int getCount(Class<? extends Entity> entityType, SQLExecutor executor, Expression expression) throws SQLException {
         SQLScalarQuery query = (expression == null) ? new SQLQuery.Builder(QueryType.COUNT).columns().from(entityType).build()
                 : new SQLQuery.Builder(QueryType.COUNT).columns().from(entityType).where(expression).build();
         int totalFound = executor.getScalarValue(query);

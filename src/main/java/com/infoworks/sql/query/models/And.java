@@ -4,10 +4,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-public class AndExpression implements ExpressionInterpreter {
+public class And implements Expression {
 
-	protected ExpressionInterpreter lhr;
-	protected ExpressionInterpreter rhr;
+	protected Expression lhr;
+	protected Expression rhr;
 
 	protected char leftParenthesis = '(';
 	protected char rightParenthesis = ')';
@@ -15,11 +15,11 @@ public class AndExpression implements ExpressionInterpreter {
 	public void setParenthesis(char left, char right){
 		leftParenthesis = left;
 		rightParenthesis = right;
-		if (lhr != null && lhr instanceof AndExpression){
-			((AndExpression)lhr).setParenthesis(left, right);
+		if (lhr != null && lhr instanceof And){
+			((And)lhr).setParenthesis(left, right);
 		}
-		if (rhr != null && rhr instanceof AndExpression){
-			((AndExpression)rhr).setParenthesis(left, right);
+		if (rhr != null && rhr instanceof And){
+			((And)rhr).setParenthesis(left, right);
 		}
 	}
 
@@ -35,7 +35,7 @@ public class AndExpression implements ExpressionInterpreter {
 		return Character.isWhitespace(leftParenthesis) && Character.isWhitespace(rightParenthesis);
 	}
 	
-	public AndExpression(ExpressionInterpreter lhr, ExpressionInterpreter rhr) {
+	public And(Expression lhr, Expression rhr) {
 		this.lhr = lhr;
 		this.rhr = rhr;
 	}
@@ -52,11 +52,11 @@ public class AndExpression implements ExpressionInterpreter {
 	}
 	
 	@Override
-	public Expression[] resolveExpressions() {
-		List<Expression> comps = new ArrayList<Expression>();
-		comps.addAll(Arrays.asList(lhr.resolveExpressions()));
-		comps.addAll(Arrays.asList(rhr.resolveExpressions()));
-		return comps.toArray(new Expression[0]);
+	public ExpressionProxy[] resolve() {
+		List<ExpressionProxy> comps = new ArrayList<ExpressionProxy>();
+		comps.addAll(Arrays.asList(lhr.resolve()));
+		comps.addAll(Arrays.asList(rhr.resolve()));
+		return comps.toArray(new ExpressionProxy[0]);
 	}
 
 }

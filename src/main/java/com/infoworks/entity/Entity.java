@@ -384,18 +384,18 @@ public abstract class Entity implements SQLEntity {
 		return isUpdate == 1;
 	}
 
-	protected ExpressionInterpreter primaryKeysInWhereExpression(QueryExecutor exe) {
+	protected Expression primaryKeysInWhereExpression(QueryExecutor exe) {
 		//return new Expression(getPrimaryProperty(null), Operator.EQUAL);
 		List<Property> keys = getPrimaryProperties(exe);
-		ExpressionInterpreter and = null;
-		ExpressionInterpreter lhr = null;
+		Expression and = null;
+		Expression lhr = null;
 		for (Property prop : keys) {
 			if(lhr == null) {
-				lhr = new Expression(prop, Operator.EQUAL);
+				lhr = new ExpressionProxy(prop, Operator.EQUAL);
 				and = lhr;
 			}else {
-				ExpressionInterpreter rhr = new Expression(prop, Operator.EQUAL);
-				and = new AndExpression(lhr, rhr);
+				Expression rhr = new ExpressionProxy(prop, Operator.EQUAL);
+				and = new And(lhr, rhr);
 				lhr = and;
 			}
 		}
@@ -475,7 +475,7 @@ public abstract class Entity implements SQLEntity {
 	@Override
 	public Boolean delete(QueryExecutor exe) throws SQLException {
 		//Expression exp = new Expression(getPrimaryProperty(exe), Operator.EQUAL);
-		ExpressionInterpreter exp = primaryKeysInWhereExpression(exe);
+		Expression exp = primaryKeysInWhereExpression(exe);
 		SQLDeleteQuery query = exe.createQueryBuilder(QueryType.DELETE)
 														.rowsFrom(Entity.tableName(getClass()))
 														.where(exp).build();
@@ -580,15 +580,15 @@ public abstract class Entity implements SQLEntity {
 			, QueryExecutor exe
 			, Property...match)
 			throws Exception {
-		ExpressionInterpreter and = null;
-		ExpressionInterpreter lhr = null;
+		Expression and = null;
+		Expression lhr = null;
 		for (int i = 0; i < match.length; i++) {
 			if(lhr == null) {
-				lhr = new Expression(match[i], Operator.EQUAL);
+				lhr = new ExpressionProxy(match[i], Operator.EQUAL);
 				and = lhr;
 			}else {
-				ExpressionInterpreter rhr = new Expression(match[i], Operator.EQUAL);
-				and = new AndExpression(lhr, rhr);
+				Expression rhr = new ExpressionProxy(match[i], Operator.EQUAL);
+				and = new And(lhr, rhr);
 				lhr = and;
 			}
 		}
@@ -597,7 +597,7 @@ public abstract class Entity implements SQLEntity {
 
 	public static <T extends Entity> List<T> read(Class<T> type
 			, QueryExecutor exe
-			, ExpressionInterpreter expression)
+			, Expression expression)
 			throws Exception {
 		String name = Entity.tableName(type);
 		SQLSelectQuery query = null;
@@ -617,7 +617,7 @@ public abstract class Entity implements SQLEntity {
 	public static <T extends Entity> void read(Class<T> aClass
 			, QueryExecutor executor
 			, int pageSize
-			, ExpressionInterpreter expression
+			, Expression expression
 			, Consumer<List<T>> consumer){
 		//
 		read(aClass, executor, pageSize, -1, expression, consumer);
@@ -627,7 +627,7 @@ public abstract class Entity implements SQLEntity {
 			, QueryExecutor executor
 			, int pageSize
 			, int rowCount
-			, ExpressionInterpreter expression
+			, Expression expression
 			, Consumer<List<T>> consumer){
 		//
 		read(aClass, executor, 0, pageSize, rowCount, expression, consumer);
@@ -638,7 +638,7 @@ public abstract class Entity implements SQLEntity {
 			, int offset
 			, int pageSize
 			, int rowCount
-			, ExpressionInterpreter expression
+			, Expression expression
 			, Consumer<List<T>> consumer){
 		//
 		if (consumer == null) return;
@@ -664,7 +664,7 @@ public abstract class Entity implements SQLEntity {
 			, int offset
 			, int pageSize
 			, int rowCount
-			, ExpressionInterpreter expression)
+			, Expression expression)
 			throws SQLException {
 		//Creating Paged SelectQueries
 		List<SQLSelectQuery> queries = new ArrayList<>();
@@ -788,7 +788,7 @@ public abstract class Entity implements SQLEntity {
 		if (mapper == null) throw new RuntimeException("mapper is empty!");
 		try {
 			int fetchCount = 0;
-			ExpressionInterpreter expression;
+			Expression expression;
 			Property nextKey = pagingKey;
 			do {
 				//Now insert the pagingKey into expression, So that we can read next batch:
@@ -904,7 +904,7 @@ public abstract class Entity implements SQLEntity {
 
 	public static void update(Class<? extends Entity> entityType
 			, QueryExecutor executor
-			, ExpressionInterpreter clause, Row row) throws SQLException {
+			, Expression clause, Row row) throws SQLException {
 		List<Property> cols = row.getProperties();
 		if (cols.isEmpty()) return;
 		SQLQuery query = executor.createQueryBuilder(QueryType.UPDATE)
@@ -917,7 +917,7 @@ public abstract class Entity implements SQLEntity {
 
 	public static void delete(Class<? extends Entity> entityType
 			, QueryExecutor executor
-			, ExpressionInterpreter clause) throws SQLException {
+			, Expression clause) throws SQLException {
 		SQLQuery query = (clause == null)
 				? executor.createQueryBuilder(QueryType.DELETE).rowsFrom(entityType).build()
 				: executor.createQueryBuilder(QueryType.DELETE).rowsFrom(entityType).where(clause).build();
@@ -926,7 +926,7 @@ public abstract class Entity implements SQLEntity {
 
 	public static int count(Class<? extends Entity> entityType
 			, QueryExecutor executor
-			, ExpressionInterpreter clause) throws SQLException {
+			, Expression clause) throws SQLException {
 		SQLQuery query = (clause == null)
 				? executor.createQueryBuilder(QueryType.COUNT).columns().from(entityType).build()
 				: executor.createQueryBuilder(QueryType.COUNT).columns().from(entityType).where(clause).build();

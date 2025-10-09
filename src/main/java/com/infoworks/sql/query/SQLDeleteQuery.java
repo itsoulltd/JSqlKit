@@ -1,7 +1,7 @@
 package com.infoworks.sql.query;
 
 import com.infoworks.connect.DriverClass;
-import com.infoworks.sql.query.models.Expression;
+import com.infoworks.sql.query.models.ExpressionProxy;
 import com.infoworks.sql.query.models.Logic;
 import com.infoworks.sql.query.models.Operator;
 
@@ -33,17 +33,17 @@ public class SQLDeleteQuery extends SQLSelectQuery{
 	
 	@Override
 	protected void prepareWhereParams(String[] whereParams) {
-		prepareWhereParams(Expression.createListFrom(whereParams, Operator.EQUAL));
+		prepareWhereParams(ExpressionProxy.createListFrom(whereParams, Operator.EQUAL));
 	}
 	
 	@Override
-	protected void prepareWhereParams(List<Expression> whereParams) {
+	protected void prepareWhereParams(List<ExpressionProxy> whereParams) {
 		super.prepareWhereParams(whereParams);
 	}
 
 	@Deprecated
     @SuppressWarnings("Duplicates")
-	public static String create(String tableName , Logic whereLogic , List<Expression> whereParams)
+	public static String create(String tableName , Logic whereLogic , List<ExpressionProxy> whereParams)
 			throws IllegalArgumentException {
 
 		//Checking Illegal Arguments
@@ -62,7 +62,7 @@ public class SQLDeleteQuery extends SQLSelectQuery{
 			if(pqlBuffer.length() > 0){
 				pqlBuffer.append( " WHERE ");
 				int count = 0;
-				for(Expression ent : whereParams){
+				for(ExpressionProxy ent : whereParams){
 					if(ent.getProperty().trim().equals("")){continue;}
 					if(count++ != 0){pqlBuffer.append( " " + whereLogic.name() + " ");}
 					pqlBuffer.append( ent.getProperty() + " " + ent.getType().toString() +" " + MARKER);

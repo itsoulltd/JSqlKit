@@ -1,13 +1,13 @@
 package com.infoworks.sql.query.models;
 
-public class JoinExpression implements ExpressionInterpreter {
+public class Join implements Expression {
 	
 	private String leftColumn;
 	private String rightColumn;
 	private String leftTable;
 	private String rightTable;
 	
-	public JoinExpression(String leftColumn, String rightColumn) {
+	public Join(String leftColumn, String rightColumn) {
 		this.leftColumn = leftColumn;
 		this.rightColumn = rightColumn;
 	}
@@ -18,7 +18,7 @@ public class JoinExpression implements ExpressionInterpreter {
 	}
 
 	@Override
-	public Expression[] resolveExpressions() {
+	public ExpressionProxy[] resolve() {
 		return null;
 	}
 

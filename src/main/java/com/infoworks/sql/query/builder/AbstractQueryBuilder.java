@@ -110,14 +110,14 @@ public abstract class AbstractQueryBuilder implements ColumnsBuilder, TableBuild
 		return this;
 	}
 	@Override
-	public GroupByBuilder where(Logic logic, Expression... comps){
+	public GroupByBuilder where(Logic logic, ExpressionProxy... comps){
 		if (logic != null){tempQuery.setLogic(logic);}
-		List<Expression> items = Arrays.asList(comps);
+		List<ExpressionProxy> items = Arrays.asList(comps);
 		tempQuery.setWhereParamExpressions(items);
 		return this;
 	}
 	@Override
-	public QueryBuilder where(Property prop, Expression comps) {
+	public QueryBuilder where(Property prop, ExpressionProxy comps) {
 		if(tempQuery instanceof SQLScalarQuery){
 			((SQLScalarQuery)tempQuery).setScalerClouse(prop, comps);
 		}
@@ -146,7 +146,7 @@ public abstract class AbstractQueryBuilder implements ColumnsBuilder, TableBuild
 		return this;
 	}
 	@Override
-	public GroupByBuilder where(ExpressionInterpreter expression) {
+	public GroupByBuilder where(Expression expression) {
 		tempQuery.setWhereExpression(expression); 
 		return this;
 	}
@@ -196,7 +196,7 @@ public abstract class AbstractQueryBuilder implements ColumnsBuilder, TableBuild
 		return this;
 	}
 	@Override
-	public OrderByBuilder having(ExpressionInterpreter expression) {
+	public OrderByBuilder having(Expression expression) {
 		if(tempQuery instanceof SQLSelectQuery) {
 			((SQLSelectQuery)tempQuery).setHavingExpression(expression);
 		}else if(tempQuery instanceof SQLJoinQuery){
@@ -216,7 +216,7 @@ public abstract class AbstractQueryBuilder implements ColumnsBuilder, TableBuild
 		return this;
 	}
 	@Override
-	public JoinBuilder on(JoinExpression expression) {
+	public JoinBuilder on(Join expression) {
 		if(tempQuery instanceof SQLJoinQuery) {
 			((SQLJoinQuery)tempQuery).setJoinExpression(expression);
 		}
@@ -225,7 +225,7 @@ public abstract class AbstractQueryBuilder implements ColumnsBuilder, TableBuild
 
 	@Override
 	public JoinBuilder on(String leftColumn, String rightColumn) {
-		return on(new JoinExpression(leftColumn, rightColumn));
+		return on(new Join(leftColumn, rightColumn));
 	}
 
 	@Override
@@ -282,7 +282,7 @@ public abstract class AbstractQueryBuilder implements ColumnsBuilder, TableBuild
 	}
 
 	@Override
-	public GroupByBuilder where(Supplier<ExpressionInterpreter> supplier) {
+	public GroupByBuilder where(Supplier<Expression> supplier) {
 		return this.where(supplier.get());
 	}
 }

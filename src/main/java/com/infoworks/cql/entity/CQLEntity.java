@@ -122,14 +122,14 @@ public abstract class CQLEntity extends Entity {
     public static <T extends Entity> List<T> read(Class<T> type, QueryExecutor exe, Property...match) throws SQLException, Exception {
         //We will add our cassandra specific search key.
         List<Property> properties = validateProperties(type, exe, Arrays.asList(match));
-        ExpressionInterpreter expression = getExpressionInterpreter(properties);
+        Expression expression = getExpressionInterpreter(properties);
         //
         String name = Entity.tableName(type);
         SQLSelectQuery query = getSqlSelectQuery(exe, expression, name);
         return exe.executeSelect(query, type, CQLEntity.mapColumnsToProperties(type));
     }
 
-    public static <T extends Entity> List<T> read(Class<T> type, QueryExecutor exe, ExpressionInterpreter expression) throws SQLException, Exception {
+    public static <T extends Entity> List<T> read(Class<T> type, QueryExecutor exe, Expression expression) throws SQLException, Exception {
         //We will add our cassandra specific search key.
         expression = validateExpressions(type, exe, expression);
 
@@ -141,14 +141,14 @@ public abstract class CQLEntity extends Entity {
     public static <T extends Entity> void read(Class<T> aClass
             , QueryExecutor executor
             , int pageSize
-            , ExpressionInterpreter expression
+            , Expression expression
             , Consumer<List<T>> consumer) { read(aClass, executor, pageSize, 20, expression, consumer); }
 
     public static <T extends Entity> void read(Class<T> aClass
             , QueryExecutor executor
             , int pageSize
             , int rowCount
-            , ExpressionInterpreter expression
+            , Expression expression
             , Consumer<List<T>> consumer) { read(aClass, executor, 0, pageSize, rowCount, expression, consumer); }
 
     public static <T extends Entity> void read(Class<T> aClass
@@ -156,7 +156,7 @@ public abstract class CQLEntity extends Entity {
             , int offset
             , int pageSize
             , int rowCount
-            , ExpressionInterpreter expression
+            , Expression expression
             , Consumer<List<T>> consumer){
         System.out.println("NOT IMPLEMENTED YET!!! IF NEEDED PLEASE EXTEND");
         //Need testing:
@@ -206,7 +206,7 @@ public abstract class CQLEntity extends Entity {
                 , consumer);
     }
 
-    private static SQLSelectQuery getSqlSelectQuery(QueryExecutor exe, ExpressionInterpreter expression, String name) {
+    private static SQLSelectQuery getSqlSelectQuery(QueryExecutor exe, Expression expression, String name) {
         SQLSelectQuery query = null;
         if(expression != null) {
             query = exe.createQueryBuilder(QueryType.SELECT)
@@ -221,27 +221,27 @@ public abstract class CQLEntity extends Entity {
         return query;
     }
 
-    protected static <T extends Entity> ExpressionInterpreter validateExpressions(Class<T> type, QueryExecutor exe, ExpressionInterpreter expression) {
-        Expression[] exps = expression.resolveExpressions();
+    protected static <T extends Entity> Expression validateExpressions(Class<T> type, QueryExecutor exe, Expression expression) {
+        ExpressionProxy[] exps = expression.resolve();
         List<Property> props = new ArrayList<>();
-        for (Expression exp : exps) {
+        for (ExpressionProxy exp : exps) {
             props.add(exp.getValueProperty());
         }
         List<Property> properties = validateProperties(type, exe, props);
-        ExpressionInterpreter interpreter = getExpressionInterpreter(properties);
+        Expression interpreter = getExpressionInterpreter(properties);
         return interpreter;
     }
 
-    protected static ExpressionInterpreter getExpressionInterpreter(List<Property> match) {
-        ExpressionInterpreter and = null;
-        ExpressionInterpreter lhr = null;
+    protected static Expression getExpressionInterpreter(List<Property> match) {
+        Expression and = null;
+        Expression lhr = null;
         for (int i = 0; i < match.size(); i++) {
             if(lhr == null) {
-                lhr = new Expression(match.get(i), Operator.EQUAL);
+                lhr = new ExpressionProxy(match.get(i), Operator.EQUAL);
                 and = lhr;
             }else {
-                ExpressionInterpreter rhr = new Expression(match.get(i), Operator.EQUAL);
-                and = new AndExpression(lhr, rhr);
+                Expression rhr = new ExpressionProxy(match.get(i), Operator.EQUAL);
+                and = new And(lhr, rhr);
                 lhr = and;
             }
         }

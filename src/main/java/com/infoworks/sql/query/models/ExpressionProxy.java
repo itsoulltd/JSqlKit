@@ -1,0 +1,120 @@
+package com.infoworks.sql.query.models;
+
+import com.infoworks.orm.DataType;
+import com.infoworks.orm.Property;
+import com.infoworks.orm.Row;
+
+import java.util.ArrayList;
+import java.util.List;
+
+public class ExpressionProxy implements Expression {
+	public ExpressionProxy(Property property, Operator type){
+		this(property.getKey(), type);
+		this.valueProperty.setValue(property.getValue());
+		this.valueProperty.setType(property.getType());
+	}
+	public ExpressionProxy(String property, Operator type){
+		this.property = property;
+		this.type = type;
+		this.valueProperty = new Property(property);
+	}
+	public String getProperty() {
+		return property;
+	}
+	public Operator getType() {
+		return type;
+	}
+	public ExpressionProxy setPropertyValue(Object value, DataType type){
+		this.valueProperty.setValue(value);
+		this.valueProperty.setType(type);
+		return this;
+	}
+	public ExpressionProxy setPropertyValue(Property from){
+		return setPropertyValue(from.getValue(), from.getType());
+	}
+	public Property getValueProperty() {
+		return valueProperty;
+	}
+	public ExpressionProxy setQuantifier(char quantifier){
+		this.quantifier = quantifier;
+		return this;
+	}
+	public ExpressionProxy setMarker(String marker){
+		this.expressMarker = marker;
+		return this;
+	}
+
+	protected static final char MARKER = '?';
+	private String property;
+	private Operator type;
+	private Property valueProperty;
+	private char quantifier = ' '; //Default is empty space
+	private String expressMarker = String.valueOf(MARKER);
+	
+	public static List<ExpressionProxy> createListFrom(String[] names, Operator type){
+		List<ExpressionProxy> resutls = new ArrayList<ExpressionProxy>();
+		for (String name : names) {
+			resutls.add(new ExpressionProxy(name, type));
+		}
+		return resutls;
+	}
+	
+	public static Row convertToRow(List<ExpressionProxy> coms){
+		Row props = new WhereProperties();
+		if(coms == null){
+			return props;
+		}
+		for (ExpressionProxy compare : coms) {
+			props.add(compare.getValueProperty());
+		}
+		return props;
+	}
+	public String toString(){
+		if (Character.isWhitespace(quantifier) == false) {return  quantifier+ "." + getProperty() + " " + type.toString() + " " + getPropertyValue(valueProperty);}
+		else {return getProperty() + " " + type.toString() + " " + getPropertyValue(valueProperty);}
+	}
+	private String getPropertyValue(Property val){
+		if(val.getValue() != null && val.getType() != null){
+			if(val.getType() == DataType.BOOL 
+					|| val.getType() == DataType.INT
+					|| val.getType() == DataType.DOUBLE
+					|| val.getType() == DataType.FLOAT) {
+				return val.getValue().toString();
+			}else{
+				return "'"+val.getValue().toString()+"'";
+			}
+		}else{
+			return  String.valueOf(MARKER);
+		}
+	}
+	protected boolean shouldInsertMarker(){
+	    //return (getValueProperty().getValue() != null);
+	    return getType() != Operator.IS_NULL
+                &&
+                getType() != Operator.NOT_NULL;
+    }
+	@Override
+	public String interpret() {
+		if (Character.isWhitespace(quantifier) == false) {
+		    return quantifier+ "." + getProperty() + " " + type.toString() + " " + (shouldInsertMarker() ? expressMarker : "");
+		}else {
+			return getProperty() + " " + type.toString() + " " + (shouldInsertMarker() ? MARKER : "");
+		}
+	}
+	@Override
+	public ExpressionProxy[] resolve() {
+		return new ExpressionProxy[] {this};
+	}
+
+    protected char getQuantifier() {
+        return quantifier;
+    }
+
+    protected String getExpressMarker() {
+        return expressMarker;
+    }
+
+    protected static char getMARKER() {
+        return MARKER;
+    }
+}

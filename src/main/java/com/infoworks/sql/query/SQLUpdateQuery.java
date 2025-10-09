@@ -64,12 +64,12 @@ public class SQLUpdateQuery extends SQLSelectQuery{
 	
 	@Override
 	protected void prepareWhereParams(String[] whereParams) {
-		prepareWhereParams(Expression.createListFrom(whereParams, Operator.EQUAL));
+		prepareWhereParams(ExpressionProxy.createListFrom(whereParams, Operator.EQUAL));
 	}
 	
 	@Override
     @SuppressWarnings("Duplicates")
-	protected void prepareWhereParams(List<Expression> whereParams) {
+	protected void prepareWhereParams(List<ExpressionProxy> whereParams) {
 		if(whereParams != null
 				&& whereParams.size() > 0
 				&& !isAllParamEmpty(whereParams.toArray())){
@@ -77,7 +77,7 @@ public class SQLUpdateQuery extends SQLSelectQuery{
 			if(whereBuffer.length() > 0){
 				whereBuffer.append("WHERE ");
 				int count = 0;
-				for(Expression param : whereParams){
+				for(ExpressionProxy param : whereParams){
 					if(param.getProperty().trim().equals("")){continue;}
 					if(count++ != 0){whereBuffer.append( " " + getLogic().name() + " ");}
 					whereBuffer.append( param.getProperty() + " " + param.getType().toString() + " " + MARKER);
@@ -87,19 +87,19 @@ public class SQLUpdateQuery extends SQLSelectQuery{
 	}
 	
 	@Override
-	protected void prepareWhereExpression(ExpressionInterpreter whereExpression) {
+	protected void prepareWhereExpression(Expression whereExpression) {
 		whereBuffer.append("WHERE " + whereExpression.interpret());
 	}
 
 	@Deprecated
     @SuppressWarnings("Duplicates")
 	public static String create(String tableName, String[]setParams, Logic whereLogic, String[] whereParams){
-		return SQLUpdateQuery.create(tableName, setParams, whereLogic, Expression.createListFrom(whereParams, Operator.EQUAL));
+		return SQLUpdateQuery.create(tableName, setParams, whereLogic, ExpressionProxy.createListFrom(whereParams, Operator.EQUAL));
 	}
 
 	@Deprecated
     @SuppressWarnings("Duplicates")
-	public static String create(String tableName, String[]setParams, Logic whereLogic, List<Expression> whereParams){
+	public static String create(String tableName, String[]setParams, Logic whereLogic, List<ExpressionProxy> whereParams){
 		
 		//Checking Illegal Arguments
 		try{
@@ -130,7 +130,7 @@ public class SQLUpdateQuery extends SQLSelectQuery{
 			if(pqlBuffer.length() > 0){
 				pqlBuffer.append(" WHERE ");
 				int count = 0;
-				for(Expression param : whereParams){
+				for(ExpressionProxy param : whereParams){
 					if(param.getProperty().trim().equals("")){continue;}
 					if(count++ != 0){pqlBuffer.append( " " + whereLogic.name() + " ");}
 					pqlBuffer.append( param.getProperty() + param.getType().toString() + MARKER);

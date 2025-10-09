@@ -19,7 +19,7 @@ public class PredicateTest {
 				.isEqualTo("sohana")
 				.and("salary")
 				.isGreaterThen(2000.0)
-				.or(new Expression(new Property("age", 18), Operator.EQUAL))
+				.or(new ExpressionProxy(new Property("age", 18), Operator.EQUAL))
 				.not();
 		//System.out.println(pred.interpret());
 		
@@ -42,7 +42,7 @@ public class PredicateTest {
 		
 		System.out.println(query.toString());
 		
-		ExpressionInterpreter exp = new Expression(new Property("name", "sohana"), Operator.EQUAL);
+		Expression exp = new ExpressionProxy(new Property("name", "sohana"), Operator.EQUAL);
 		
 		SQLSelectQuery query2 = new SQLQuery.Builder(QueryType.SELECT).columns()
 				.from("Passenger")
@@ -54,10 +54,10 @@ public class PredicateTest {
 	@Test
 	public void testOld() {
 		
-		ExpressionInterpreter pred = new AndExpression(new Expression(new Property("name", "sohana"), Operator.EQUAL)
-				, new Expression(new Property("salary", "20000.00"), Operator.GREATER_THAN));
-		pred = new OrExpression(pred, new Expression(new Property("age", 18), Operator.EQUAL));
-		pred = new NotExpression(pred);
+		Expression pred = new And(new ExpressionProxy(new Property("name", "sohana"), Operator.EQUAL)
+				, new ExpressionProxy(new Property("salary", "20000.00"), Operator.GREATER_THAN));
+		pred = new Or(pred, new ExpressionProxy(new Property("age", 18), Operator.EQUAL));
+		pred = new Not(pred);
 		//System.out.println(pred.interpret());
 		
 		SQLSelectQuery query = new SQLQuery.Builder(QueryType.SELECT).columns()

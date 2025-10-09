@@ -1,8 +1,8 @@
 package com.infoworks.sql.query.models;
 
-public class OrExpression extends AndExpression {
+public class Or extends And {
 
-	public OrExpression(ExpressionInterpreter lhr, ExpressionInterpreter rhr) {
+	public Or(Expression lhr, Expression rhr) {
 		super(lhr, rhr);
 	}
 

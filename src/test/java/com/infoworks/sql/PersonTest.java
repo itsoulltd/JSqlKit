@@ -3,8 +3,8 @@ package com.infoworks.sql;
 import com.infoworks.connect.DriverClass;
 import com.infoworks.script.SQLScriptExecutor;
 import com.infoworks.sql.executor.SQLExecutor;
+import com.infoworks.sql.query.models.ExpressionProxy;
 import com.infoworks.sql.query.models.Expression;
-import com.infoworks.sql.query.models.ExpressionInterpreter;
 import com.infoworks.sql.query.models.Operator;
 import com.infoworks.orm.Property;
 import org.junit.After;
@@ -143,7 +143,7 @@ public class PersonTest {
 	//@Test
 	public void testReadClassOfTSQLExecutorExpressionInterpreter() {
 		try {
-			ExpressionInterpreter exp = new Expression(new Property("name", "Sohana"), Operator.EQUAL);
+			Expression exp = new ExpressionProxy(new Property("name", "Sohana"), Operator.EQUAL);
 			List<Person> sons = Person.read(Person.class, exe, exp);
 			for (Person person : sons) {
 				if(person.getDob() != null) {

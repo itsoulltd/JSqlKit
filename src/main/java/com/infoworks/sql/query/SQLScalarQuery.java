@@ -49,7 +49,7 @@ public class SQLScalarQuery extends SQLSelectQuery{
 		pqlBuffer.append(" FROM " + name + " ");
 	}
 	
-	public void setScalerClouse(Property prop, Expression comps){
+	public void setScalerClouse(Property prop, ExpressionProxy comps){
 		if(prop != null){
 			pqlBuffer.append("WHERE " + prop.getKey() +" "+ comps.getType().toString() +" ");
 			if(prop.getType() == DataType.BOOL
@@ -64,11 +64,11 @@ public class SQLScalarQuery extends SQLSelectQuery{
 	}
 	
 	@Override
-	protected void prepareWhereParams(List<Expression> whereParams) {
+	protected void prepareWhereParams(List<ExpressionProxy> whereParams) {
 		if(whereParams != null && whereParams.size() > 0){
 			pqlBuffer.append("WHERE " );
 			int count = 0;
-			for (Expression ent : whereParams) {
+			for (ExpressionProxy ent : whereParams) {
 				if(count++ != 0)
 					pqlBuffer.append(" "+ getLogic().name() +" ");
 				pqlBuffer.append(ent.getProperty()+ " " 
@@ -79,7 +79,7 @@ public class SQLScalarQuery extends SQLSelectQuery{
 
 	@Deprecated
     @SuppressWarnings("Duplicates")
-	public static String createCountFunctionQuery(String tableName, String param, Logic logic, List<Expression> whereParams){
+	public static String createCountFunctionQuery(String tableName, String param, Logic logic, List<ExpressionProxy> whereParams){
 
 		param = (param != null && param.length()>=1) ? param : "*";
 		
@@ -90,7 +90,7 @@ public class SQLScalarQuery extends SQLSelectQuery{
 		if(whereParams != null && whereParams.size() > 0){
 			builder.append("Where " );
 			int count = 0;
-			for (Expression ent : whereParams) {
+			for (ExpressionProxy ent : whereParams) {
 				if(count++ != 0)
 					builder.append(" "+ logic.name() +" ");
 				builder.append(ent.getProperty() + " " 
