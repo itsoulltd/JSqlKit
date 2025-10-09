@@ -1,9 +1,9 @@
 package com.infoworks.sql.query;
 
 import com.infoworks.connect.DriverClass;
-import com.infoworks.sql.query.models.DataType;
-import com.infoworks.sql.query.models.Property;
-import com.infoworks.sql.query.models.Row;
+import com.infoworks.orm.DataType;
+import com.infoworks.orm.Property;
+import com.infoworks.orm.Row;
 
 import java.util.List;
 import java.util.Map.Entry;

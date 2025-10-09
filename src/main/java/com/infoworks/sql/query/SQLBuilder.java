@@ -1,9 +1,9 @@
 package com.infoworks.sql.query;
 
-import com.infoworks.sql.query.models.DataType;
+import com.infoworks.orm.DataType;
 import com.infoworks.sql.query.models.Logic;
 import com.infoworks.sql.query.models.Operator;
-import com.infoworks.sql.query.models.Property;
+import com.infoworks.orm.Property;
 
 import java.util.Map;
 import java.util.Map.Entry;

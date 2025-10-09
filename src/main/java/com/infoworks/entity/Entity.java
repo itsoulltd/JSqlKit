@@ -1,5 +1,9 @@
 package com.infoworks.entity;
 
+import com.infoworks.objects.Ignore;
+import com.infoworks.orm.DataType;
+import com.infoworks.orm.Property;
+import com.infoworks.orm.Row;
 import com.infoworks.sql.executor.QueryExecutor;
 import com.infoworks.sql.query.*;
 import com.infoworks.sql.query.models.*;

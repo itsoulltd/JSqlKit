@@ -1,6 +1,8 @@
 package com.infoworks.sql.query;
 
 import com.infoworks.connect.DriverClass;
+import com.infoworks.orm.DataType;
+import com.infoworks.orm.Property;
 import com.infoworks.sql.query.models.*;
 
 import java.util.List;
@@ -50,7 +52,7 @@ public class SQLScalarQuery extends SQLSelectQuery{
 	public void setScalerClouse(Property prop, Expression comps){
 		if(prop != null){
 			pqlBuffer.append("WHERE " + prop.getKey() +" "+ comps.getType().toString() +" ");
-			if(prop.getType() == DataType.BOOL 
+			if(prop.getType() == DataType.BOOL
 					|| prop.getType() == DataType.INT
 					|| prop.getType() == DataType.DOUBLE
 					|| prop.getType() == DataType.FLOAT) {

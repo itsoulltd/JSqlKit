@@ -1,6 +1,6 @@
 package com.infoworks.entity;
 
-import com.infoworks.sql.query.models.DataType;
+import com.infoworks.orm.DataType;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;

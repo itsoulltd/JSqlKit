@@ -1,4 +1,4 @@
-package com.infoworks.sql.query.models;
+package com.infoworks.orm;
 
 import java.math.BigDecimal;
 import java.sql.Blob;

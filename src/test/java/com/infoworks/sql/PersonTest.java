@@ -6,7 +6,7 @@ import com.infoworks.sql.executor.SQLExecutor;
 import com.infoworks.sql.query.models.Expression;
 import com.infoworks.sql.query.models.ExpressionInterpreter;
 import com.infoworks.sql.query.models.Operator;
-import com.infoworks.sql.query.models.Property;
+import com.infoworks.orm.Property;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;

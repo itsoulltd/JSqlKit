@@ -15,14 +15,14 @@ import com.infoworks.sql.executor.AbstractExecutor;
 import com.infoworks.sql.executor.QueryExecutor;
 import com.infoworks.entity.Column;
 import com.infoworks.entity.Entity;
-import com.infoworks.entity.Ignore;
+import com.infoworks.objects.Ignore;
 import com.infoworks.entity.PrimaryKey;
 import com.infoworks.sql.query.QueryType;
 import com.infoworks.sql.query.SQLScalarQuery;
 import com.infoworks.sql.query.SQLSelectQuery;
-import com.infoworks.sql.query.models.Property;
-import com.infoworks.sql.query.models.Row;
-import com.infoworks.sql.query.models.Table;
+import com.infoworks.orm.Property;
+import com.infoworks.orm.Row;
+import com.infoworks.orm.Table;
 import com.infoworks.sql.query.models.Where;
 
 import java.awt.image.BufferedImage;

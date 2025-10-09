@@ -1,6 +1,7 @@
 package com.infoworks.sql.query.builder;
 
 import com.infoworks.entity.Entity;
+import com.infoworks.orm.Property;
 import com.infoworks.sql.query.*;
 import com.infoworks.sql.query.models.*;
 

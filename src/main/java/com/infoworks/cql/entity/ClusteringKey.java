@@ -1,6 +1,6 @@
 package com.infoworks.cql.entity;
 
-import com.infoworks.sql.query.models.DataType;
+import com.infoworks.orm.DataType;
 import com.infoworks.sql.query.models.Operator;
 
 import java.lang.annotation.ElementType;

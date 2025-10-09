@@ -2,6 +2,8 @@ package com.infoworks.sql;
 
 import com.infoworks.connect.DriverClass;
 import com.infoworks.entity.Entity;
+import com.infoworks.orm.Property;
+import com.infoworks.orm.Row;
 import com.infoworks.sql.query.*;
 import com.infoworks.sql.query.models.*;
 import org.junit.Assert;

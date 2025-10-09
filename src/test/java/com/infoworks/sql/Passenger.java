@@ -1,11 +1,11 @@
 package com.infoworks.sql;
 
 import com.infoworks.entity.Entity;
-import com.infoworks.entity.Ignore;
+import com.infoworks.objects.Ignore;
 import com.infoworks.entity.PrimaryKey;
 import com.infoworks.entity.TableName;
 import com.infoworks.sql.executor.SQLExecutor;
-import com.infoworks.sql.query.models.Property;
+import com.infoworks.orm.Property;
 
 import javax.persistence.Column;
 import java.util.Calendar;

@@ -1,4 +1,4 @@
-package com.infoworks.sql.query.models;
+package com.infoworks.orm;
 
 import com.infoworks.entity.SQLEntity;
 

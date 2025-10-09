@@ -5,8 +5,8 @@ import com.infoworks.entity.Entity;
 import com.infoworks.entity.PrimaryKey;
 import com.infoworks.entity.TableName;
 import com.infoworks.sql.executor.SQLExecutor;
-import com.infoworks.sql.query.models.DataType;
-import com.infoworks.sql.query.models.Property;
+import com.infoworks.orm.DataType;
+import com.infoworks.orm.Property;
 
 import java.sql.Date;
 import java.sql.Timestamp;

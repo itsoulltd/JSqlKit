@@ -1,7 +1,7 @@
 package com.infoworks.sql.query.builder;
 
 import com.infoworks.entity.Entity;
-import com.infoworks.sql.query.models.Property;
+import com.infoworks.orm.Property;
 
 public interface ColumnsBuilder extends QueryBuilder{
 	TableBuilder columns(String... name);

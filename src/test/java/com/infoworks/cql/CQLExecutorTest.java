@@ -9,7 +9,7 @@ import com.infoworks.sql.query.QueryType;
 import com.infoworks.sql.query.SQLScalarQuery;
 import com.infoworks.sql.query.models.Operator;
 import com.infoworks.sql.query.models.Predicate;
-import com.infoworks.sql.query.models.Property;
+import com.infoworks.orm.Property;
 import com.infoworks.sql.query.models.Where;
 import org.junit.After;
 import org.junit.Assert;

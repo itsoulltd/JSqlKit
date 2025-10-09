@@ -1,6 +1,10 @@
 package com.infoworks.sql;
 
 import com.infoworks.connect.DriverClass;
+import com.infoworks.orm.DataType;
+import com.infoworks.orm.Property;
+import com.infoworks.orm.Row;
+import com.infoworks.orm.Table;
 import com.infoworks.script.SQLScriptExecutor;
 import com.infoworks.sql.executor.SQLExecutor;
 import com.infoworks.sql.query.*;

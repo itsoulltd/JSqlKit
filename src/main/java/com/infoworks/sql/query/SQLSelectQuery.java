@@ -1,6 +1,7 @@
 package com.infoworks.sql.query;
 
 import com.infoworks.connect.DriverClass;
+import com.infoworks.orm.Row;
 import com.infoworks.sql.query.models.*;
 
 import java.util.ArrayList;

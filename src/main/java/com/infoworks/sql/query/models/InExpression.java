@@ -1,5 +1,8 @@
 package com.infoworks.sql.query.models;
 
+import com.infoworks.orm.DataType;
+import com.infoworks.orm.Property;
+
 import java.util.List;
 
 public class InExpression extends Expression {

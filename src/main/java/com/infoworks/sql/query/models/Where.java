@@ -1,5 +1,8 @@
 package com.infoworks.sql.query.models;
 
+import com.infoworks.orm.DataType;
+import com.infoworks.orm.Property;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;

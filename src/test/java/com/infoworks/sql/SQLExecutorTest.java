@@ -2,7 +2,7 @@ package com.infoworks.sql;
 
 import com.infoworks.entity.Entity;
 import com.infoworks.sql.executor.SQLExecutor;
-import com.infoworks.sql.query.models.Row;
+import com.infoworks.orm.Row;
 import org.junit.Assert;
 
 import java.sql.SQLException;

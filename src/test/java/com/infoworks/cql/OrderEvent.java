@@ -5,10 +5,10 @@ import com.infoworks.cql.entity.CQLIndex;
 import com.infoworks.cql.entity.ClusteringKey;
 import com.infoworks.cql.entity.EnableTimeToLive;
 import com.infoworks.entity.Column;
-import com.infoworks.entity.Ignore;
+import com.infoworks.objects.Ignore;
 import com.infoworks.entity.PrimaryKey;
 import com.infoworks.entity.TableName;
-import com.infoworks.sql.query.models.DataType;
+import com.infoworks.orm.DataType;
 
 import java.util.Date;
 import java.util.Map;

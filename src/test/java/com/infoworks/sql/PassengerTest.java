@@ -3,7 +3,7 @@ package com.infoworks.sql;
 import com.infoworks.connect.DriverClass;
 import com.infoworks.script.SQLScriptExecutor;
 import com.infoworks.sql.executor.SQLExecutor;
-import com.infoworks.sql.query.models.Property;
+import com.infoworks.orm.Property;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;

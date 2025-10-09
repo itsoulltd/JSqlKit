@@ -1,10 +1,11 @@
 package com.infoworks.cql.entity;
 
 import com.infoworks.cql.query.CQLInsertQuery;
+import com.infoworks.orm.Property;
 import com.infoworks.sql.executor.QueryExecutor;
 import com.infoworks.entity.Column;
 import com.infoworks.entity.Entity;
-import com.infoworks.entity.Ignore;
+import com.infoworks.objects.Ignore;
 import com.infoworks.entity.PrimaryKey;
 import com.infoworks.sql.query.QueryType;
 import com.infoworks.sql.query.SQLSelectQuery;

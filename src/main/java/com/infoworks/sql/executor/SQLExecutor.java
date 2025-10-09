@@ -4,10 +4,10 @@ import com.infoworks.connect.DriverClass;
 import com.infoworks.connect.JDBConnection;
 import com.infoworks.entity.Entity;
 import com.infoworks.sql.query.*;
-import com.infoworks.sql.query.models.DataType;
-import com.infoworks.sql.query.models.Property;
-import com.infoworks.sql.query.models.Row;
-import com.infoworks.sql.query.models.Table;
+import com.infoworks.orm.DataType;
+import com.infoworks.orm.Property;
+import com.infoworks.orm.Row;
+import com.infoworks.orm.Table;
 
 import java.sql.*;
 import java.util.ArrayList;

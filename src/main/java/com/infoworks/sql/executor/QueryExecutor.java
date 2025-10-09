@@ -5,7 +5,7 @@ import com.infoworks.entity.Entity;
 import com.infoworks.sql.query.QueryType;
 import com.infoworks.sql.query.SQLQuery;
 import com.infoworks.sql.query.builder.AbstractQueryBuilder;
-import com.infoworks.sql.query.models.Row;
+import com.infoworks.orm.Row;
 
 import java.sql.SQLException;
 import java.util.List;

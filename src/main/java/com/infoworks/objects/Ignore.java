@@ -1,4 +1,4 @@
-package com.infoworks.entity;
+package com.infoworks.objects;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;

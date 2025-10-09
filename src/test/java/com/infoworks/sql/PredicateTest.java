@@ -1,5 +1,6 @@
 package com.infoworks.sql;
 
+import com.infoworks.orm.Property;
 import com.infoworks.sql.query.QueryType;
 import com.infoworks.sql.query.SQLQuery;
 import com.infoworks.sql.query.SQLSelectQuery;

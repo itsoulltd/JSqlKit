@@ -1,5 +1,7 @@
 package com.infoworks.sql.query.models;
 
+import com.infoworks.orm.Property;
+
 public class BtwExpression extends Expression {
 
     private Property secondValueProperty;

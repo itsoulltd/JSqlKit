@@ -1,8 +1,8 @@
 package com.infoworks.sql.executor;
 
 import com.infoworks.entity.Entity;
-import com.infoworks.sql.query.models.DataType;
-import com.infoworks.sql.query.models.Table;
+import com.infoworks.orm.DataType;
+import com.infoworks.orm.Table;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;

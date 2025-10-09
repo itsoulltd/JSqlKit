@@ -1,8 +1,8 @@
 package com.infoworks.sql;
 
 import com.infoworks.entity.Entity;
-import com.infoworks.entity.Ignore;
-import com.infoworks.sql.query.models.Row;
+import com.infoworks.objects.Ignore;
+import com.infoworks.orm.Row;
 import org.junit.Assert;
 import org.junit.Test;
 
