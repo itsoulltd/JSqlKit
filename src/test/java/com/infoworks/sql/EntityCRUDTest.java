@@ -1,7 +1,7 @@
 package com.infoworks.sql;
 
 import com.infoworks.PLogger;
-import com.infoworks.connect.DriverClass;
+import com.infoworks.connect.JDBCDriverClass;
 import com.infoworks.script.SQLScriptExecutor;
 import com.infoworks.entity.Entity;
 import com.infoworks.sql.executor.SQLExecutor;
@@ -28,7 +28,7 @@ public class EntityCRUDTest {
 
     @Before
     public void setUp() throws Exception {
-        exe = new SQLExecutor.Builder(DriverClass.H2_EMBEDDED)
+        exe = new SQLExecutor.Builder(JDBCDriverClass.H2_EMBEDDED)
                 .database("testH2DB")
                 .credential("sa", "").build();
         //

@@ -6,7 +6,7 @@ import com.datastax.driver.core.policies.ReconnectionPolicy;
 import com.datastax.driver.core.policies.RetryPolicy;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
-import com.infoworks.connect.DriverClass;
+import com.infoworks.connect.JDBCDriverClass;
 import com.infoworks.cql.entity.CQLEntity;
 import com.infoworks.cql.entity.CQLIndex;
 import com.infoworks.cql.entity.ClusteringKey;
@@ -338,7 +338,7 @@ public class CQLExecutor extends AbstractExecutor implements QueryExecutor<CQLSe
     }
 
     @Override
-    public DriverClass getDialect() {
+    public JDBCDriverClass getDialect() {
         return null;
     }
 

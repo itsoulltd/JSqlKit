@@ -1,6 +1,6 @@
 package com.infoworks.db;
 
-import com.infoworks.connect.DriverClass;
+import com.infoworks.connect.JDBCDriverClass;
 import com.infoworks.script.SQLScriptExecutor;
 
 import java.io.File;
@@ -12,7 +12,7 @@ import java.sql.SQLException;
 
 public final class SQLConnector {
 
-    public static void executeScripts(DriverClass driverClass, String dbName, File file) throws SQLException {
+    public static void executeScripts(JDBCDriverClass driverClass, String dbName, File file) throws SQLException {
         SQLScriptExecutor runner = new SQLScriptExecutor();
         Connection conn = createConnection(driverClass, dbName);
         file = (file == null) ? new File(String.format("%s.sql", dbName)) : file;
@@ -20,21 +20,21 @@ public final class SQLConnector {
         runner.execute(cmds, conn);
     }
 
-    public static Connection createExecutor(DriverClass driverClass, String dbName) throws SQLException {
+    public static Connection createExecutor(JDBCDriverClass driverClass, String dbName) throws SQLException {
         Connection conn = createConnection(driverClass, dbName);
         return conn;
     }
 
-    public static Connection createConnection(DriverClass driverClass, String dbName) throws SQLException {
+    public static Connection createConnection(JDBCDriverClass driverClass, String dbName) throws SQLException {
         //Input validation:
         Connection conn = null;
-        driverClass = (driverClass == null) ? DriverClass.H2_EMBEDDED : driverClass;
+        driverClass = (driverClass == null) ? JDBCDriverClass.H2_EMBEDDED : driverClass;
         if (dbName == null || dbName.isEmpty()) throw new SQLException("Database Name (dbName) is null or empty.");
         //Create connections:
-        if (driverClass == DriverClass.MYSQL) {
+        if (driverClass == JDBCDriverClass.MYSQL) {
             String connectionStr = driverClass.urlSchema() + "localhost:3306" + driverClass.pathPrefix() + dbName.trim();
             conn = DriverManager.getConnection(connectionStr, "root", "root@123");
-        } else if (driverClass == DriverClass.H2_FILE) {
+        } else if (driverClass == JDBCDriverClass.H2_FILE) {
             dbName = (!looksLikeAPath(dbName)) ? String.format("~/%s", dbName) : dbName;
             String linkQuery = ";DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE;DATABASE_TO_LOWER=TRUE;CASE_INSENSITIVE_IDENTIFIERS=TRUE";
             String connectionStr = driverClass.urlSchema() + driverClass.pathPrefix() + dbName.trim() + linkQuery;

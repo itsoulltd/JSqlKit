@@ -1,6 +1,6 @@
 package com.infoworks.sql;
 
-import com.infoworks.connect.DriverClass;
+import com.infoworks.connect.JDBCDriverClass;
 import com.infoworks.orm.DataType;
 import com.infoworks.orm.Property;
 import com.infoworks.orm.Row;
@@ -28,7 +28,7 @@ public class SQLExecutorTestWithH2DB extends SQLExecutorTest {
 
     @Before
     public void setUp() throws Exception {
-        exe = new SQLExecutor.Builder(DriverClass.H2_EMBEDDED)
+        exe = new SQLExecutor.Builder(JDBCDriverClass.H2_EMBEDDED)
                 .database("testH2DB")
                 .credential("sa", "")
                 .query(";DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=TRUE;") //DATABASE_TO_LOWER=TRUE;CASE_INSENSITIVE_IDENTIFIERS=TRUE

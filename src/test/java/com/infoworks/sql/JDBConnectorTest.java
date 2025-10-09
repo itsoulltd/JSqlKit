@@ -1,6 +1,6 @@
 package com.infoworks.sql;
 
-import com.infoworks.connect.DriverClass;
+import com.infoworks.connect.JDBCDriverClass;
 import com.infoworks.connect.JDBConnection;
 import org.junit.Assert;
 import org.junit.Test;
@@ -17,7 +17,7 @@ public class JDBConnectorTest {
 			//means host name will be generated based on
 			//jdbc:<datasource>://localhost:<default-port>/<database-name> for the DriverClass;
 			//Replace with: DriverClass.MYSQL
-			conn = new JDBConnection.Builder(DriverClass.H2_EMBEDDED)
+			conn = new JDBConnection.Builder(JDBCDriverClass.H2_EMBEDDED)
 					.host("localhost", "3306")
 					.database("testDB")
 					.credential("root","root@123")
@@ -33,7 +33,7 @@ public class JDBConnectorTest {
 	public void testDriver() {
 		Connection conn = null;
 		try {
-			conn = new JDBConnection.Builder(DriverClass.H2_EMBEDDED)
+			conn = new JDBConnection.Builder(JDBCDriverClass.H2_EMBEDDED)
 					.database("testDB")
 					.credential("sa", "sa")
 					.build();
@@ -64,7 +64,7 @@ public class JDBConnectorTest {
 	public void testConnUrlH2A() {
 		Connection conn = null;
 		try {
-			conn = new JDBConnection.Builder(DriverClass.H2_EMBEDDED)
+			conn = new JDBConnection.Builder(JDBCDriverClass.H2_EMBEDDED)
 					.database("testH2DB")
 					.credential("sa","")
 					.query(";DB_CLOSE_DELAY=-1")
@@ -97,7 +97,7 @@ public class JDBConnectorTest {
 	public void testConnDriver() {
 		Connection conn = null;
 		try {
-			conn = new JDBConnection.Builder(DriverClass.MYSQL)
+			conn = new JDBConnection.Builder(JDBCDriverClass.MYSQL)
 					.host("localhost", "3306")
 					.database("testDB")
 					.credential("root","root@123")

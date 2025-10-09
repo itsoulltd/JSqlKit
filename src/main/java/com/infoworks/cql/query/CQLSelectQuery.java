@@ -1,6 +1,6 @@
 package com.infoworks.cql.query;
 
-import com.infoworks.connect.DriverClass;
+import com.infoworks.connect.JDBCDriverClass;
 import com.infoworks.sql.query.SQLSelectQuery;
 import com.infoworks.sql.query.models.Expression;
 
@@ -16,7 +16,7 @@ public class CQLSelectQuery extends SQLSelectQuery {
     }
 
     @Override
-    protected void appendLimit(StringBuffer pqlBuffer, DriverClass dialect) {
+    protected void appendLimit(StringBuffer pqlBuffer, JDBCDriverClass dialect) {
         //super.appendLimit(pqlBuffer, dialect);
         if (limit > 0) {
             if (pqlBuffer.toString().contains("LIMIT"))

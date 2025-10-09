@@ -1,6 +1,6 @@
 package com.infoworks.sql.query;
 
-import com.infoworks.connect.DriverClass;
+import com.infoworks.connect.JDBCDriverClass;
 import com.infoworks.orm.DataType;
 import com.infoworks.orm.Property;
 import com.infoworks.sql.query.models.*;
@@ -25,7 +25,7 @@ public class SQLScalarQuery extends SQLSelectQuery{
 	}
 
 	@Override
-	protected String queryString(DriverClass dialect) throws IllegalArgumentException {
+	protected String queryString(JDBCDriverClass dialect) throws IllegalArgumentException {
 		if(getTableName() == null || getTableName().trim().equals("")){
 			throw new IllegalArgumentException("Parameter Table must not be Null OR Empty.");
 		}

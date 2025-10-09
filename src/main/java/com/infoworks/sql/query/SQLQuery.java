@@ -1,7 +1,7 @@
 package com.infoworks.sql.query;
 
 
-import com.infoworks.connect.DriverClass;
+import com.infoworks.connect.JDBCDriverClass;
 import com.infoworks.orm.DataType;
 import com.infoworks.orm.Property;
 import com.infoworks.orm.Row;
@@ -103,7 +103,7 @@ public abstract class SQLQuery {
 	protected static final char STARIC = '*';
 	protected static final char MARKER = '?';
 	
-	protected String queryString(DriverClass dialect) throws IllegalArgumentException {
+	protected String queryString(JDBCDriverClass dialect) throws IllegalArgumentException {
 		if(tableName == null || tableName.trim().equals("")){
 			throw new IllegalArgumentException("Parameter 'tableName' must not be Null OR Empty.");
 		}
@@ -111,11 +111,11 @@ public abstract class SQLQuery {
 	}
 	
 	@Override
-	public String toString() {return toString(DriverClass.MYSQL);}
-	public String toString(DriverClass dialect) {return queryString(dialect).trim();}
+	public String toString() {return toString(JDBCDriverClass.MYSQL);}
+	public String toString(JDBCDriverClass dialect) {return queryString(dialect).trim();}
 
-	public String bindValueToString(){return bindValueToString(DriverClass.MYSQL);}
-	public String bindValueToString(DriverClass dialect){return queryString(dialect).trim();}
+	public String bindValueToString(){return bindValueToString(JDBCDriverClass.MYSQL);}
+	public String bindValueToString(JDBCDriverClass dialect){return queryString(dialect).trim();}
 	
 	private String tableName;
 	private String[] columns;

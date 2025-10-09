@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
 
-public enum DriverClass {
+public enum JDBCDriverClass {
 
     MYSQL("com.mysql.jdbc.Driver","jdbc:mysql://","3306", "/"),
     PostgresQLv7("org.postgresql.Driver","jdbc:postgresql://","5432", "/"),
@@ -26,7 +26,7 @@ public enum DriverClass {
     private final String defaultPort;
     private final String pathPrefix;
 
-    DriverClass(String driverClassName, String urlSchema, String defaultPort, String pathPrefix) {
+    JDBCDriverClass(String driverClassName, String urlSchema, String defaultPort, String pathPrefix) {
         this.driverClassName = driverClassName;
         this.urlSchema = urlSchema;
         this.defaultPort = defaultPort;
@@ -47,10 +47,10 @@ public enum DriverClass {
 
     public String pathPrefix() { return pathPrefix; }
 
-    public static DriverClass getMatchedDriver(String connectionURL) {
-        DriverClass result = JDBC_ODBC;
-        List<DriverClass> all = new ArrayList<>(EnumSet.allOf(DriverClass.class));
-        for (DriverClass driverClass : all) {
+    public static JDBCDriverClass getMatchedDriver(String connectionURL) {
+        JDBCDriverClass result = JDBC_ODBC;
+        List<JDBCDriverClass> all = new ArrayList<>(EnumSet.allOf(JDBCDriverClass.class));
+        for (JDBCDriverClass driverClass : all) {
             if (connectionURL.startsWith(driverClass.urlSchema())) {
                 result = driverClass;
                 break;

@@ -1,6 +1,6 @@
 package com.infoworks.sql.query;
 
-import com.infoworks.connect.DriverClass;
+import com.infoworks.connect.JDBCDriverClass;
 import com.infoworks.orm.DataType;
 import com.infoworks.orm.Property;
 import com.infoworks.orm.Row;
@@ -16,7 +16,7 @@ public class SQLInsertQuery extends SQLQuery{
 	private Row row;
 	
 	@Override
-	protected String queryString(DriverClass dialect) throws IllegalArgumentException {
+	protected String queryString(JDBCDriverClass dialect) throws IllegalArgumentException {
 		super.queryString(dialect);
 		return pqlBuffer.toString() + paramBuffer.toString() + valueBuffer.toString();
 	}
@@ -132,7 +132,7 @@ public class SQLInsertQuery extends SQLQuery{
 	}
 
     @Override
-    public String bindValueToString(DriverClass dialect) {
+    public String bindValueToString(JDBCDriverClass dialect) {
         StringBuffer buffer = new StringBuffer(toString(dialect));
         if (getRow() != null)
             buffer = bindValueToQueryBuffer(buffer, getRow());

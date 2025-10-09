@@ -1,6 +1,6 @@
 package com.infoworks.sql.executor;
 
-import com.infoworks.connect.DriverClass;
+import com.infoworks.connect.JDBCDriverClass;
 import com.infoworks.entity.Entity;
 import com.infoworks.sql.query.QueryType;
 import com.infoworks.sql.query.SQLQuery;
@@ -37,5 +37,5 @@ public interface QueryExecutor<S extends SQLQuery
 
     <T extends Entity> List<T> executeCRUDQuery(String query, Class<T> type) throws SQLException, IllegalAccessException, InstantiationException;
 
-    DriverClass getDialect();
+    JDBCDriverClass getDialect();
 }

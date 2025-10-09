@@ -1,6 +1,6 @@
 package com.infoworks.sql.query;
 
-import com.infoworks.connect.DriverClass;
+import com.infoworks.connect.JDBCDriverClass;
 import com.infoworks.sql.query.models.ExpressionProxy;
 import com.infoworks.sql.query.models.Logic;
 import com.infoworks.sql.query.models.Operator;
@@ -14,7 +14,7 @@ public class SQLDeleteQuery extends SQLSelectQuery{
 	}
 	
 	@Override
-	protected String queryString(DriverClass dialect) throws IllegalArgumentException {
+	protected String queryString(JDBCDriverClass dialect) throws IllegalArgumentException {
 		if(getTableName() == null || getTableName().trim().equals("")){
 			throw new IllegalArgumentException("Parameter Table must not be Null OR Empty.");
 		}

@@ -1,6 +1,6 @@
 package com.infoworks.sql;
 
-import com.infoworks.connect.DriverClass;
+import com.infoworks.connect.JDBCDriverClass;
 import com.infoworks.orm.DataType;
 import com.infoworks.orm.Property;
 import com.infoworks.orm.Row;
@@ -30,7 +30,7 @@ public class SQLExecutorTestWithMySQL extends SQLExecutorTest {
 
     @Before
     public void setUp() throws Exception {
-        exe = new SQLExecutor.Builder(DriverClass.MYSQL)
+        exe = new SQLExecutor.Builder(JDBCDriverClass.MYSQL)
                 .host("localhost", "3306")
                 .database("testDB")
                 .credential("root", "root")

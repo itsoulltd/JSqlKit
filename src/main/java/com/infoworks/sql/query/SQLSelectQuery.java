@@ -1,6 +1,6 @@
 package com.infoworks.sql.query;
 
-import com.infoworks.connect.DriverClass;
+import com.infoworks.connect.JDBCDriverClass;
 import com.infoworks.orm.Row;
 import com.infoworks.sql.query.models.*;
 
@@ -23,7 +23,7 @@ public class SQLSelectQuery extends SQLQuery{
 	}
 	
 	@Override
-	protected String queryString(DriverClass dialect) throws IllegalArgumentException {
+	protected String queryString(JDBCDriverClass dialect) throws IllegalArgumentException {
 		super.queryString(dialect);
 		appendLimit(pqlBuffer, dialect);
 		return pqlBuffer.toString();
@@ -47,16 +47,16 @@ public class SQLSelectQuery extends SQLQuery{
 		this.offset = (offset < 0) ? 0 : offset;
 	}
 
-	protected void appendLimit(StringBuffer pqlBuffer, DriverClass dialect) {
+	protected void appendLimit(StringBuffer pqlBuffer, JDBCDriverClass dialect) {
 		//General ANIS-SQL Format => OFFSET %s ROWS FETCH NEXT %s ROWS ONLY
 		//Mysql & H2 variants SQL Format => LIMIT %s OFFSET %s
 		if (limit > 0) {
-			if (dialect == DriverClass.MYSQL
-					|| dialect == DriverClass.H2_EMBEDDED
-					|| dialect == DriverClass.H2_FILE
-					|| dialect == DriverClass.H2_SERVER
-					|| dialect == DriverClass.H2_SERVER_TLS
-					|| dialect == DriverClass.HSQL_EMBEDDED){
+			if (dialect == JDBCDriverClass.MYSQL
+					|| dialect == JDBCDriverClass.H2_EMBEDDED
+					|| dialect == JDBCDriverClass.H2_FILE
+					|| dialect == JDBCDriverClass.H2_SERVER
+					|| dialect == JDBCDriverClass.H2_SERVER_TLS
+					|| dialect == JDBCDriverClass.HSQL_EMBEDDED){
 				//
 				if (pqlBuffer.toString().contains("LIMIT")) return;
 				pqlBuffer.append(" LIMIT " + limit) ;
@@ -270,7 +270,7 @@ public class SQLSelectQuery extends SQLQuery{
 	}
 
     @Override
-    public String bindValueToString(DriverClass dialect) {
+    public String bindValueToString(JDBCDriverClass dialect) {
         StringBuffer buffer = new StringBuffer(toString(dialect));
         if(getWhereProperties() != null)
             buffer = bindValueToQueryBuffer(buffer, getWhereProperties());

@@ -1,6 +1,6 @@
 package com.infoworks.sql.executor;
 
-import com.infoworks.connect.DriverClass;
+import com.infoworks.connect.JDBCDriverClass;
 import com.infoworks.connect.JDBConnection;
 import com.infoworks.entity.Entity;
 import com.infoworks.sql.query.*;
@@ -22,8 +22,8 @@ public class SQLExecutor extends AbstractExecutor implements QueryExecutor<SQLSe
 
 	public static class Builder {
 		private JDBConnection.Builder connectionBuilder;
-		private DriverClass driver;
-		public Builder(DriverClass driver){
+		private JDBCDriverClass driver;
+		public Builder(JDBCDriverClass driver){
 			connectionBuilder = new JDBConnection.Builder(driver);
 			this.driver = driver;
 		}
@@ -53,14 +53,14 @@ public class SQLExecutor extends AbstractExecutor implements QueryExecutor<SQLSe
 
 	private static Logger LOG = Logger.getLogger(SQLExecutor.class.getSimpleName());
 	private final Connection conn;
-	private DriverClass dialect = DriverClass.MYSQL;
+	private JDBCDriverClass dialect = JDBCDriverClass.MYSQL;
 
 	@Override
-	public DriverClass getDialect() {
+	public JDBCDriverClass getDialect() {
 		return dialect;
 	}
 
-	public void setDialect(DriverClass dialect){
+	public void setDialect(JDBCDriverClass dialect){
 		this.dialect = dialect;
 	}
 
@@ -696,13 +696,13 @@ public class SQLExecutor extends AbstractExecutor implements QueryExecutor<SQLSe
 		return executeDDLStatement(query);
 	}
 
-	public <T extends Entity> Boolean createTable(Class<T> tableType, DriverClass driverClass) throws SQLException {
+	public <T extends Entity> Boolean createTable(Class<T> tableType, JDBCDriverClass driverClass) throws SQLException {
 		String tableNameStr = getTableName(tableType);
 		if (tableNameStr == null) return false;
 
 		StringBuffer headBuffer = new StringBuffer("CREATE TABLE IF NOT EXISTS " + tableNameStr);
 
-		if (driverClass == DriverClass.MYSQL){
+		if (driverClass == JDBCDriverClass.MYSQL){
 			//TODO:
 		}else{
 			//TODO:

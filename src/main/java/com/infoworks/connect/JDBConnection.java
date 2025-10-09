@@ -14,15 +14,15 @@ public class JDBConnection implements Serializable {
 		private JDBConnection dbConnection;
 		private StringBuffer hostStr = new StringBuffer();
 		private String dbName;
-		private final DriverClass driver;
+		private final JDBCDriverClass driver;
 		private String linkQuery;
 		public Builder(String connectionURL){
 			dbConnection = new JDBConnection();
 			dbConnection.serverUrl = connectionURL;
-			driver = DriverClass.getMatchedDriver(connectionURL);
+			driver = JDBCDriverClass.getMatchedDriver(connectionURL);
 			dbConnection.driver = driver.toString();
 		}
-		public Builder(DriverClass driver){
+		public Builder(JDBCDriverClass driver){
 			dbConnection = new JDBConnection();
 			dbConnection.driver = driver.toString();
 			this.driver = driver;

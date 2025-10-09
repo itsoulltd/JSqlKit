@@ -1,6 +1,6 @@
 package com.infoworks.sql.query;
 
-import com.infoworks.connect.DriverClass;
+import com.infoworks.connect.JDBCDriverClass;
 import com.infoworks.sql.query.models.Expression;
 import com.infoworks.sql.query.models.Join;
 import com.infoworks.sql.query.models.Operator;
@@ -25,7 +25,7 @@ public class SQLJoinQuery extends SQLSelectQuery {
 	}
 	
 	@Override
-	protected String queryString(DriverClass dialect) throws IllegalArgumentException {
+	protected String queryString(JDBCDriverClass dialect) throws IllegalArgumentException {
 		StringBuffer buffer = new StringBuffer("SELECT ");
 		//
 		StringBuffer columnBuffer = new StringBuffer();
@@ -239,8 +239,8 @@ public class SQLJoinQuery extends SQLSelectQuery {
 		public String getName() {
 			return (alice != null && !alice.isEmpty()) ? alice : name;
 		}
-		public String getAsAlice(DriverClass dialect) {
-			if (dialect == DriverClass.OracleOCI9i) {
+		public String getAsAlice(JDBCDriverClass dialect) {
+			if (dialect == JDBCDriverClass.OracleOCI9i) {
 				return (alice != null && !alice.isEmpty()) ? (name + " " + alice) : name;
 			} else {
 				return (alice != null && !alice.isEmpty()) ? (name + " AS " + alice) : name;

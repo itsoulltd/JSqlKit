@@ -1,6 +1,6 @@
 package com.infoworks.sql;
 
-import com.infoworks.connect.DriverClass;
+import com.infoworks.connect.JDBCDriverClass;
 import com.infoworks.script.SQLScriptExecutor;
 import com.infoworks.sql.executor.SQLExecutor;
 import com.infoworks.sql.query.models.ExpressionProxy;
@@ -32,7 +32,7 @@ public class PersonTest {
 	public void before(){
 		
 		try {
-			exe = new SQLExecutor.Builder(DriverClass.H2_EMBEDDED)
+			exe = new SQLExecutor.Builder(JDBCDriverClass.H2_EMBEDDED)
 					.database("testH2DB")
 					.credential("sa", "").build();
 			//
