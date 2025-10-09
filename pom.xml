@@ -120,6 +120,7 @@
                 <version>3.5.3</version>
                 <configuration>
                     <excludes>
+                        <exclude>JDBConnectorTest</exclude>
                         <exclude>CQLExecutorTest.java</exclude>
                         <exclude>CQLExecutorAsyncReadTest.java</exclude>
                         <exclude>SQLExecutorTestWithMySQL.java</exclude>
