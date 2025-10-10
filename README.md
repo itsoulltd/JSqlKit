@@ -164,7 +164,8 @@
     
 #### OrderBY, GroupBy, Limit, Offset
 	
-    Expression clause = new And(new Expression("name", Operator.EQUAL), new Expression("age", Operator.GREATER_THAN));
+    Expression clause = new And(new ExpressionProxy("name", Operator.EQUAL)
+                                , new ExpressionProxy("age", Operator.GREATER_THAN));
                     
 	//ORderBy
 	SQLQuery query = new SQLQuery.Builder(QueryType.SELECT)
