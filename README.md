@@ -12,13 +12,12 @@
         
         Step 2. Add the dependency
         <dependency>
-            <groupId>com.github.itsoulltd</groupId>
-            <artifactId>JSQLEditor</artifactId>
-            <version>v1.1.3-RELEASE</version>
+            <groupId>com.github.itsoulltd.JSqlKit</groupId>
+            <artifactId>java-sql-kit</artifactId>
         </dependency>
 
 
-### JSQLEditor has 3 ways of connecting with DataSource:
+### JSqlKit has 3 ways of connecting with DataSource:
 ----
 	
     - JDBC Connection URL
@@ -30,7 +29,7 @@
 
 ##### Creating Connections:
 	
-    Connection conn = new JDBConnection.Builder(DriverClass.MYSQL)
+    Connection conn = new JDBConnection.Builder(JDBCDriverClass.MYSQL)
                       		.host("localhost", "3306")
                       		.database("testDB")
                       		.credential("root","towhid")
@@ -71,72 +70,7 @@
     .
     .
     .
-    
-    
- 
- #### Using JPA persistence.xml
- 
- ##### First Define a persistence.xml in /src/main/resources/META-INF/persistence.xml OR /src/META-INF/persistence.xml
-    
-    <?xml version="1.0" encoding="UTF-8"?>
-    <persistence version="2.1" xmlns="http://xmlns.jcp.org/xml/ns/persistence"
-        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-        xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/persistence
-            http://xmlns.jcp.org/xml/ns/persistence/persistence_2_1.xsd">
-        <persistence-unit name="testDB">
-            <!-- <provider>org.hibernate.ejb.HibernatePersistence</provider> -->
-            <properties>
-                 <property name="hibernate.connection.driver_class" value="com.mysql.jdbc.Driver"/>
-                 <property name="hibernate.connection.username" value="root"/>
-                 <property name="hibernate.connection.password" value="****"/>
-                 <property name="hibernate.connection.url" value="jdbc:mysql://localhost:3306/testDB?useUnicode=true&amp;useJDBCCompliantTimezoneShift=true&amp;useLegacyDatetimeCode=false&amp;serverTimezone=UTC"/>
-                 <property name="hibernate.dialect" value="org.hibernate.dialect.MySQL5Dialect"/>
-                 <!--<property name="hibernate.archive.autodetection" value="class"/>-->
-                 <property name="hibernate.show_sql" value="true"/>
-                 <property name="hibernate.format_sql" value="true"/>
-                 <property name="hibernate.hbm2ddl.auto" value="create"/>
-            </properties>
-       </persistence-unit>
-    </persistence>
- 
- ##### Sample Code:
- 
- 	
-    ORMController controller = new ORMController("persistence-unit-name");
-    EntityManager em = controller.getEntityManager();
-    .
-    .
-    //We may have an entity that represent person_tbl in database
-    @Entity
-    @Table(name="person_tbl")
-    public class Person{
-    
-        @ID
-        private int id;
-        
-        @Column
-        private String name;
-        ...
-    }
-    
-    //Now we can create a service for Person entity.
-    ORMService<Person> service = new ORMService(em, Person.class);
-    List<Person> all = (List<Person>) service.read();
-    //Create a new Person
-    Person newOne = new Person();
-    newOne.setName("Jack Gyl");
-    service.insert(newOne);
-    //Update
-    newOne.setName("Jack Gyllenhaal");
-    service.update(newOne);
-    //Delete
-    service.delete(newOne);
-    //Check exist
-    service.exist(newOne.getId()); return true if exist in persistence layer.
-    //Total rows
-    long count = service.rowCount(); // return number of rows inserted till now.
-    
-    
+
     
 ### JSQLEditor has QueryBuilder to create verbose sql statements.
 ----
@@ -185,7 +119,7 @@
  
  #### Count & Distinct
  	
-    Expression comps = new Expression("name", Operator.EQUAL);
+    Expression comps = new ExpressionProxy("name", Operator.EQUAL);
     SQLQuery count = new SQLQuery.Builder(QueryType.COUNT)
 				     .columns().on("Passenger")
 				     .where(comps)
@@ -230,8 +164,7 @@
     
 #### OrderBY, GroupBy, Limit, Offset
 	
-    ExpressionInterpreter clause = new AndExpression(new Expression("name", Operator.EQUAL)
-    											, new Expression("age", Operator.GREATER_THAN));
+    Expression clause = new And(new Expression("name", Operator.EQUAL), new Expression("age", Operator.GREATER_THAN));
                     
 	//ORderBy
 	SQLQuery query = new SQLQuery.Builder(QueryType.SELECT)
@@ -332,7 +265,7 @@
 ##### How to work with Person.java entity.
 	
     Connection conn = new JDBConnection.Builder("jdbc:mysql://localhost:3306/testDB")
-					.driver(DriverClass.MYSQL)
+					.driver(JDBCDriverClass.MYSQL)
 					.credential("root","****")
 					.build();
                                         
