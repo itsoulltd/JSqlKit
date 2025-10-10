@@ -1,7 +1,5 @@
 package com.infoworks.entity;
 
-import com.infoworks.entity.Entity;
-
 import java.util.Map;
 
 @FunctionalInterface
