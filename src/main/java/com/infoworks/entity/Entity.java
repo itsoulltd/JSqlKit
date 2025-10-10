@@ -19,7 +19,8 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 
-public abstract class Entity implements SQLEntity {
+public abstract class Entity implements iEntity, SQLEntity {
+
 	public Entity() {
 		super();
 	}
@@ -323,8 +324,8 @@ public abstract class Entity implements SQLEntity {
 				//Notice:We are interested into reading just the filed name:value into a map.
 				try {
 					Object fieldValue = field.get(this);
-					if (fieldValue != null && SQLEntity.class.isAssignableFrom(fieldValue.getClass())){
-						SQLEntity enIf = (SQLEntity) fieldValue;
+					if (fieldValue != null && iEntity.class.isAssignableFrom(fieldValue.getClass())){
+						iEntity enIf = (iEntity) fieldValue;
 						result.put(field.getName(), enIf.marshalling(inherit));
 					}else {
 						result.put(field.getName(), fieldValue);
@@ -347,9 +348,9 @@ public abstract class Entity implements SQLEntity {
 					Object entry = data.get(field.getName());
 					if(entry != null) {
 						try {
-							if (SQLEntity.class.isAssignableFrom(field.getType())){
-								//Now we can say this might-be a marshaled object that confirm to EntityInterface,
-								SQLEntity enIf = (SQLEntity) field.getType().newInstance();
+							if (iEntity.class.isAssignableFrom(field.getType())){
+								//Now we can say this might-be a marshaled object that confirm to iEntity,
+								iEntity enIf = (iEntity) field.getType().newInstance();
 								if(entry instanceof Map)
 									enIf.unmarshalling((Map<String, Object>) entry, true);
 								field.set(this, enIf);
@@ -489,6 +490,7 @@ public abstract class Entity implements SQLEntity {
     }
 
     ///////////////////////////////////////Class API///////////////////////////////////////
+
 	protected static <T extends Entity> boolean shouldAcceptAllAsProperty(Class<T> type) {
 		if(type.isAnnotationPresent(TableName.class)) {
             TableName tableName = type.getAnnotation(TableName.class);

@@ -1,6 +1,6 @@
 package com.infoworks.orm;
 
-import com.infoworks.entity.SQLEntity;
+import com.infoworks.entity.iEntity;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -106,8 +106,8 @@ public class Row {
 		Class<T> cls = type;
 		T newInstance = cls.newInstance();
 		Field[] fields;
-		if (SQLEntity.class.isAssignableFrom(cls)){
-		    fields = ((SQLEntity)newInstance).getDeclaredFields(true);
+		if (iEntity.class.isAssignableFrom(cls)){
+		    fields = ((iEntity)newInstance).getDeclaredFields(true);
         }else{
             fields = cls.getDeclaredFields();
         }
