@@ -71,7 +71,7 @@ public abstract class Entity implements iEntity, SQLEntity {
 		return result;
 	}
 
-	public final Field getDeclaredField(String fieldName, boolean inherit) throws NoSuchFieldException {
+	private Field getDeclaredField(String fieldName, boolean inherit) throws NoSuchFieldException {
         //Search for the field, until get found any of the super class.
         //But not infinite round: MAX=8
         int maxLoopCount = 8;
@@ -192,9 +192,6 @@ public abstract class Entity implements iEntity, SQLEntity {
         fields.addAll(Arrays.asList(getClass().getDeclaredFields()));
         if (inherit){
             //Inherit properties from one immediate parent which is not Entity.class.
-            /*if (!getClass().getSuperclass().getSimpleName().equalsIgnoreCase(Entity.class.getSimpleName())){
-                fields.addAll(Arrays.asList(getClass().getSuperclass().getDeclaredFields()));
-            }*/
             Class mySuperClass = getClass().getSuperclass();
             while(!mySuperClass.getSimpleName().equalsIgnoreCase(Entity.class.getSimpleName())){
                 fields.addAll(Arrays.asList(mySuperClass.getDeclaredFields()));
