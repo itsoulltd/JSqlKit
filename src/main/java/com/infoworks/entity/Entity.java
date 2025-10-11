@@ -1,6 +1,7 @@
 package com.infoworks.entity;
 
 import com.infoworks.objects.Ignore;
+import com.infoworks.objects.iMessage;
 import com.infoworks.orm.DataType;
 import com.infoworks.orm.Property;
 import com.infoworks.orm.Row;
@@ -19,7 +20,7 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 
-public abstract class Entity implements iEntity, SQLEntity {
+public abstract class Entity implements SQLEntity, iMessage {
 
 	public Entity() {
 		super();
@@ -321,8 +322,8 @@ public abstract class Entity implements iEntity, SQLEntity {
 				//Notice:We are interested into reading just the filed name:value into a map.
 				try {
 					Object fieldValue = field.get(this);
-					if (fieldValue != null && iEntity.class.isAssignableFrom(fieldValue.getClass())){
-						iEntity enIf = (iEntity) fieldValue;
+					if (fieldValue != null && iMessage.class.isAssignableFrom(fieldValue.getClass())){
+						iMessage enIf = (iMessage) fieldValue;
 						result.put(field.getName(), enIf.marshalling(inherit));
 					}else {
 						result.put(field.getName(), fieldValue);
@@ -345,9 +346,9 @@ public abstract class Entity implements iEntity, SQLEntity {
 					Object entry = data.get(field.getName());
 					if(entry != null) {
 						try {
-							if (iEntity.class.isAssignableFrom(field.getType())){
+							if (iMessage.class.isAssignableFrom(field.getType())){
 								//Now we can say this might-be a marshaled object that confirm to iEntity,
-								iEntity enIf = (iEntity) field.getType().newInstance();
+								iMessage enIf = (iMessage) field.getType().newInstance();
 								if(entry instanceof Map)
 									enIf.unmarshalling((Map<String, Object>) entry, true);
 								field.set(this, enIf);
