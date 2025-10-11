@@ -24,6 +24,9 @@ import java.util.List;
 
 public class EntityCRUDTest {
 
+    String sql_file_name = "testDB.sql";
+    String sql_file_name_v14 = "testDB-v1.4.200.sql";
+    String sql_file_name_v22 = "testDB-v2.2.220.sql";
     private SQLExecutor exe;
 
     @Before
@@ -33,7 +36,7 @@ public class EntityCRUDTest {
                 .credential("sa", "").build();
         //
         SQLScriptExecutor runner = new SQLScriptExecutor();
-        File file = new File("testDB.sql");
+        File file = new File(sql_file_name_v14);
         String[] cmds = runner.commands(runner.createStream(file));
         for (String cmd:cmds) {
             try {

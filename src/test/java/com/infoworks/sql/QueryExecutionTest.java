@@ -21,7 +21,10 @@ import java.util.List;
 import java.util.Map;
 
 public class QueryExecutionTest {
-	
+
+	String sql_file_name = "testDB.sql";
+	String sql_file_name_v14 = "testDB-v1.4.200.sql";
+	String sql_file_name_v22 = "testDB-v2.2.220.sql";
 	SQLExecutor exe;
 	
 	@Before
@@ -32,7 +35,7 @@ public class QueryExecutionTest {
 					.credential("sa", "").build();
 			//
 			SQLScriptExecutor runner = new SQLScriptExecutor();
-			File file = new File("testDB.sql");
+			File file = new File(sql_file_name_v14);
 			String[] cmds = runner.commands(runner.createStream(file));
 			for (String cmd:cmds) {
 				try {

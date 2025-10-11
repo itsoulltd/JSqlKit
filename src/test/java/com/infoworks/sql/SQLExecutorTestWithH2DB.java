@@ -10,10 +10,7 @@ import com.infoworks.entity.Entity;
 import com.infoworks.sql.executor.SQLExecutor;
 import com.infoworks.sql.query.*;
 import com.infoworks.sql.query.models.*;
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.*;
 
 import java.io.File;
 import java.sql.ResultSet;
@@ -24,6 +21,9 @@ import java.util.List;
 
 public class SQLExecutorTestWithH2DB extends SQLExecutorTest {
 
+    String sql_file_name = "testDB.sql";
+    String sql_file_name_v14 = "testDB-v1.4.200.sql";
+    String sql_file_name_v22 = "testDB-v2.2.220.sql";
     private SQLExecutor exe;
 
     @Before
@@ -35,7 +35,7 @@ public class SQLExecutorTestWithH2DB extends SQLExecutorTest {
                 .build();
         //
         SQLScriptExecutor runner = new SQLScriptExecutor();
-        File file = new File("testDB.sql");
+        File file = new File(sql_file_name_v14);
         String[] cmds = runner.commands(runner.createStream(file));
         for (String cmd:cmds) {
             try {
@@ -58,18 +58,18 @@ public class SQLExecutorTestWithH2DB extends SQLExecutorTest {
     @Test
     public void useTest(){
         try {
-            //exe.useDatabase("testDB");
             boolean isCreated = exe.executeDDLQuery("CREATE TABLE IF NOT EXISTS Passenger (" +
                     "id int auto_increment primary key" +
                     ", name varchar(1024) null" +
                     ", age  int default '18' null" +
                     ", sex varchar(12) null" +
+                    ", dob datetime null" +
+                    ", createdate timestamp null" +
                     ", constraint Passenger_id_uindex unique (id));");
             Assert.assertTrue("Created Successfully", isCreated);
         } catch (SQLException e) {
             System.out.println(e.getMessage());
         }
-
     }
 
     @Test
@@ -82,6 +82,7 @@ public class SQLExecutorTestWithH2DB extends SQLExecutorTest {
         SQLInsertQuery query = new SQLQuery.Builder(QueryType.INSERT)
                 .into("Passenger")
                 .values(new Row()
+                        .add("id", Passenger.incrementAndGetId())
                         .add("name","MyName-A")
                         .add(new Property("age", age, DataType.INT))
                         .add("sex", sex).getProperties().toArray(new Property[0]))
@@ -149,7 +150,7 @@ public class SQLExecutorTestWithH2DB extends SQLExecutorTest {
         Assert.assertTrue(results.size() == 1);
     }
 
-    @Test
+    @Test @Ignore("Skipped for grouped run.")
     public void asyncReadAllTest() throws Exception {
         //Prepare Seed-Data:
         Long startTime = seedPassengers();

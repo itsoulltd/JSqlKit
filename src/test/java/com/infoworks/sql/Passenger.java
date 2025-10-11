@@ -29,7 +29,7 @@ public class Passenger extends Entity {
 	private Date createdate;
 	@Ignore
 	private static Integer _autoIncrement = 0;
-	public Passenger() {}
+	public Passenger() { setId(_autoIncrement++); }
 	public Passenger(String name
 			, String sex
 			, int age) {
@@ -46,6 +46,7 @@ public class Passenger extends Entity {
 		calendar.set(Calendar.YEAR, year);
 		setDob(new java.sql.Date(calendar.getTime().getTime()));
 	}
+	public static Integer incrementAndGetId() { return ++_autoIncrement; }
 	public Integer getId() {
 		return id;
 	}

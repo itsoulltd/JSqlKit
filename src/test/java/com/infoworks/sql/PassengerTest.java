@@ -14,7 +14,10 @@ import java.sql.SQLException;
 import java.util.Random;
 
 public class PassengerTest {
-	
+
+	String sql_file_name = "testDB.sql";
+	String sql_file_name_v14 = "testDB-v1.4.200.sql";
+	String sql_file_name_v22 = "testDB-v2.2.220.sql";
 	SQLExecutor exe;
 	String[] names = new String[]{"Sohana","Towhid","Tanvir","Sumaiya","Tusin"};
 	Integer[] ages = new Integer[] {15, 18, 28, 26, 32, 34, 25, 67};
@@ -28,7 +31,7 @@ public class PassengerTest {
 					.credential("sa", "").build();
 			//
 			SQLScriptExecutor runner = new SQLScriptExecutor();
-			File file = new File("testDB.sql");
+			File file = new File(sql_file_name_v14);
 			String[] cmds = runner.commands(runner.createStream(file));
 			for (String cmd:cmds) {
 				try {

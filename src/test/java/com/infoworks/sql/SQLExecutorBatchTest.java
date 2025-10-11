@@ -20,6 +20,9 @@ import java.util.UUID;
 
 public class SQLExecutorBatchTest {
 
+    String sql_file_name = "testDB.sql";
+    String sql_file_name_v14 = "testDB-v1.4.200.sql";
+    String sql_file_name_v22 = "testDB-v2.2.220.sql";
     private SQLExecutor exe;
 
     String[] names = new String[]{"Sohana","Towhid","Tanvir","Sumaiya","Tusin"};
@@ -44,7 +47,7 @@ public class SQLExecutorBatchTest {
                 .credential("sa", "").build();
         //
         SQLScriptExecutor runner = new SQLScriptExecutor();
-        File file = new File("testDB.sql");
+        File file = new File(sql_file_name_v14);
         String[] cmds = runner.commands(runner.createStream(file));
         for (String cmd:cmds) {
             try {
