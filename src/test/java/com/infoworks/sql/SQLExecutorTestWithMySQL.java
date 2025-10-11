@@ -38,7 +38,7 @@ public class SQLExecutorTestWithMySQL extends SQLExecutorTest {
                 .build();
         //
         SQLScriptExecutor runner = new SQLScriptExecutor();
-        File file = new File("testDB.sql");
+        File file = new File("testDB-MySql.sql");
         String[] cmds = runner.commands(runner.createStream(file));
         for (String cmd:cmds) {
             try {

@@ -21,7 +21,7 @@ import java.util.List;
 
 public class SQLExecutorTestWithH2DB extends SQLExecutorTest {
 
-    String sql_file_name = "testDB.sql";
+    String sql_file_name = "testDB-MySql.sql";
     String sql_file_name_v14 = "testDB-v1.4.200.sql";
     String sql_file_name_v22 = "testDB-v2.2.220.sql";
     private SQLExecutor exe;
