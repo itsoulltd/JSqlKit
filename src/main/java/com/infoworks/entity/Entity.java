@@ -131,7 +131,7 @@ public abstract class Entity implements SQLEntity, iMessage {
         return value;
     }
 
-	private java.util.Date parseDate(String val, DataType type, String format){
+	private java.util.Date parseDate(String val, DataType type, String format) {
 		try {
 			SimpleDateFormat formatter = new SimpleDateFormat((format != null && format.trim().isEmpty() == false)
 					? format
@@ -149,11 +149,11 @@ public abstract class Entity implements SQLEntity, iMessage {
 	}
 
 	private DataType getFieldDataType(Field field) {
-		if (field.isAnnotationPresent(Column.class)){
+		if (field.isAnnotationPresent(Column.class)) {
 			Column annotation = field.getAnnotation(Column.class);
 			DataType type = annotation.type();
 			return type;
-		}else{
+		} else {
 			Class type = field.getType();
 			if (Integer.class.isAssignableFrom(type)){
 				return DataType.INT;
@@ -188,7 +188,7 @@ public abstract class Entity implements SQLEntity, iMessage {
         return isAnnotated;
     }
 
-    public final Field[] getDeclaredFields(boolean inherit){
+    public final Field[] getDeclaredFields(boolean inherit) {
         List<Field> fields = new ArrayList<>();
         fields.addAll(Arrays.asList(getClass().getDeclaredFields()));
         if (inherit){
@@ -244,7 +244,7 @@ public abstract class Entity implements SQLEntity, iMessage {
 		return _isAutoIncremented;
 	}
 
-	private Field getGeneratedValueField(){
+	private Field getGeneratedValueField() {
 	    Field[] fields = getDeclaredFields(true);
 	    Field fl = null;
         for (Field field: fields) {
@@ -335,7 +335,7 @@ public abstract class Entity implements SQLEntity, iMessage {
         return result;
     }
 
-	public void unmarshalling(Map<String, Object> data, boolean inherit){
+	public void unmarshalling(Map<String, Object> data, boolean inherit) {
 		if (data != null) {
 			Field[] fields = getDeclaredFields(inherit);
 			for (Field field : fields) {
@@ -500,7 +500,7 @@ public abstract class Entity implements SQLEntity, iMessage {
         return false;
 	}
 
-    protected final static <T extends Entity> Field[] getDeclaredFields(Class<T> type, boolean inherit){
+    protected final static <T extends Entity> Field[] getDeclaredFields(Class<T> type, boolean inherit) {
         Field[] fields = new Field[0];
         try {
             T newInstance = type.newInstance();
@@ -546,7 +546,7 @@ public abstract class Entity implements SQLEntity, iMessage {
 	}
 
 	public static <T extends Entity> String tableName(Class<T> type) {
-		if (type.isAnnotationPresent(TableName.class)){
+		if (type.isAnnotationPresent(TableName.class)) {
 			TableName tableName = type.getAnnotation(TableName.class);
 			String name = (tableName.value().trim().isEmpty()) ? type.getSimpleName() : tableName.value().trim();
 			return name;
@@ -618,7 +618,7 @@ public abstract class Entity implements SQLEntity, iMessage {
 			, QueryExecutor executor
 			, int pageSize
 			, Expression expression
-			, Consumer<List<T>> consumer){
+			, Consumer<List<T>> consumer) {
 		//
 		read(aClass, executor, pageSize, -1, expression, consumer);
 	}
@@ -639,7 +639,7 @@ public abstract class Entity implements SQLEntity, iMessage {
 			, int pageSize
 			, int rowCount
 			, Expression expression
-			, Consumer<List<T>> consumer){
+			, Consumer<List<T>> consumer) {
 		//
 		if (consumer == null) return;
 		try {
@@ -873,7 +873,7 @@ public abstract class Entity implements SQLEntity, iMessage {
 		return row;
 	}
 
-	public static <T extends Entity> Map<String, List<T>> groupBy(String groupByKey, List<T> rows){
+	public static <T extends Entity> Map<String, List<T>> groupBy(String groupByKey, List<T> rows) {
 		Map<String, List<T>> results = new ConcurrentHashMap<>();
 		for (T row : rows) {
 			Map<String, Object> map = row.marshalling(true);
