@@ -11,18 +11,19 @@ import java.util.List;
  * @since 19-Aug-19
  */
 public interface EntityMapper<R extends Entity> {
-    default List<R> extract(ResultSet rs) throws SQLException {
-        int index = 0;
+    default List<R> map(ResultSet rs) throws SQLException {
+        if (rs == null) return new ArrayList<>();
         List<R> collection = new ArrayList<>();
         ResultSetMetaData rsmd = rs.getMetaData();
-        int numCol = rsmd.getColumnCount();
+        int columnCount = rsmd.getColumnCount();
+        int rowIdx = 0;
         while (rs.next()){
             try {
-                R entity = entity(rs, index++, numCol);
+                R entity = entity(rs, columnCount, rowIdx++);
                 collection.add(entity);
             } catch (SQLException e) { throw new RuntimeException(e); }
         }
         return collection;
     }
-    R entity(ResultSet rs, int rowNum, int columnCount) throws SQLException;
+    R entity(ResultSet rs, int columnCount, int rowIdx) throws SQLException;
 }
