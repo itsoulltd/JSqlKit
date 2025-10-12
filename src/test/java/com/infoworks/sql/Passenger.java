@@ -7,7 +7,7 @@ import com.infoworks.entity.TableName;
 import com.infoworks.sql.executor.SQLExecutor;
 import com.infoworks.orm.Property;
 
-import javax.persistence.Column;
+import jakarta.persistence.Column;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Objects;

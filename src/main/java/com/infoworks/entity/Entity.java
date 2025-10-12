@@ -9,9 +9,9 @@ import com.infoworks.sql.executor.QueryExecutor;
 import com.infoworks.sql.query.*;
 import com.infoworks.sql.query.models.*;
 
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Table;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Table;
 import java.lang.reflect.Field;
 import java.sql.Date;
 import java.sql.*;
@@ -184,7 +184,7 @@ public abstract class Entity implements SQLEntity, iMessage {
     protected boolean hasColumnAnnotationPresent(Field field) {
         boolean isAnnotated = field.isAnnotationPresent(Column.class)
                 || field.isAnnotationPresent(PrimaryKey.class)
-				|| field.isAnnotationPresent(javax.persistence.Column.class);
+				|| field.isAnnotationPresent(jakarta.persistence.Column.class);
         return isAnnotated;
     }
 
@@ -211,15 +211,15 @@ public abstract class Entity implements SQLEntity, iMessage {
 			Column column = field.getAnnotation(Column.class);
 			String clName = column.name().trim();
 			return (!clName.isEmpty()) ? clName : field.getName();
-		}else if(field.isAnnotationPresent(javax.persistence.Column.class)) {
-			javax.persistence.Column column = field.getAnnotation(javax.persistence.Column.class);
+		} else if(field.isAnnotationPresent(jakarta.persistence.Column.class)) {
+			jakarta.persistence.Column column = field.getAnnotation(jakarta.persistence.Column.class);
 			String clName = column.name().trim();
 			return (!clName.isEmpty()) ? clName : field.getName();
-		}else if(field.isAnnotationPresent(PrimaryKey.class)) {
+		} else if(field.isAnnotationPresent(PrimaryKey.class)) {
 			PrimaryKey pm = field.getAnnotation(PrimaryKey.class);
 			String pmName = pm.name().trim();
 			return (!pmName.isEmpty()) ? pmName : field.getName();
-		}else {
+		} else {
 			return field.getName();
 		}
 	}
@@ -494,7 +494,7 @@ public abstract class Entity implements SQLEntity, iMessage {
             TableName tableName = type.getAnnotation(TableName.class);
             return tableName.acceptAll();
         }
-        if (type.isAnnotationPresent(javax.persistence.Entity.class)){
+        if (type.isAnnotationPresent(jakarta.persistence.Entity.class)) {
 		    return true;
         }
         return false;
@@ -522,22 +522,22 @@ public abstract class Entity implements SQLEntity, iMessage {
 		for (Field field : Entity.getDeclaredFields(type, true)) {
 			if(acceptAll == false
 					&& field.isAnnotationPresent(Column.class) == false
-					&& field.isAnnotationPresent(javax.persistence.Column.class) == false
+					&& field.isAnnotationPresent(jakarta.persistence.Column.class) == false
 					&& field.isAnnotationPresent(PrimaryKey.class) == false) {
 				continue;
 			}
             if (field.isAnnotationPresent(Ignore.class))
                 continue;
-			if (field.isAnnotationPresent(Column.class)){
+			if (field.isAnnotationPresent(Column.class)) {
 				Column column = field.getAnnotation(Column.class);
 				String columnName = (column.name().trim().isEmpty() == false) ? column.name().trim() : field.getName();
 				result.put(columnName, field.getName());
-			}else if(field.isAnnotationPresent(PrimaryKey.class)){
+			} else if(field.isAnnotationPresent(PrimaryKey.class)) {
 				PrimaryKey primaryKey = field.getAnnotation(PrimaryKey.class);
 				String columnName = (primaryKey.name().trim().isEmpty() == false) ? primaryKey.name().trim() : field.getName();
 				result.put(columnName, field.getName());
-			}else if (field.isAnnotationPresent(javax.persistence.Column.class)){
-                javax.persistence.Column column = field.getAnnotation(javax.persistence.Column.class);
+			} else if (field.isAnnotationPresent(jakarta.persistence.Column.class)) {
+                jakarta.persistence.Column column = field.getAnnotation(jakarta.persistence.Column.class);
                 String columnName = (column.name().trim().isEmpty() == false) ? column.name().trim() : field.getName();
                 result.put(columnName, field.getName());
             }
@@ -550,11 +550,11 @@ public abstract class Entity implements SQLEntity, iMessage {
 			TableName tableName = type.getAnnotation(TableName.class);
 			String name = (tableName.value().trim().isEmpty()) ? type.getSimpleName() : tableName.value().trim();
 			return name;
-		}else if (type.isAnnotationPresent(Table.class)){
+		} else if (type.isAnnotationPresent(Table.class)) {
 			Table tableName = type.getAnnotation(Table.class);
 			String name = (tableName.name().trim().isEmpty()) ? type.getSimpleName() : tableName.name().trim();
 			return name;
-		}else {
+		} else {
 			return type.getSimpleName();
 		}
 	}

@@ -96,23 +96,23 @@ public abstract class CQLEntity extends Entity {
         for (Field field : type.getDeclaredFields()) {
             if (field.isAnnotationPresent(Ignore.class))
                 continue;
-            if (field.isAnnotationPresent(Column.class)){
+            if (field.isAnnotationPresent(Column.class)) {
                 Column column = field.getAnnotation(Column.class);
                 String columnName = (column.name().trim().isEmpty() == false) ? column.name().trim() : field.getName();
                 results.put(columnName, field.getName());
-            }else if (field.isAnnotationPresent(javax.persistence.Column.class)){
-                javax.persistence.Column column = field.getAnnotation(javax.persistence.Column.class);
+            } else if (field.isAnnotationPresent(jakarta.persistence.Column.class)) {
+                jakarta.persistence.Column column = field.getAnnotation(jakarta.persistence.Column.class);
                 String columnName = (column.name().trim().isEmpty() == false) ? column.name().trim() : field.getName();
                 results.put(columnName, field.getName());
-            }else if(field.isAnnotationPresent(PrimaryKey.class)){
+            } else if(field.isAnnotationPresent(PrimaryKey.class)) {
                 PrimaryKey primaryKey = field.getAnnotation(PrimaryKey.class);
                 String columnName = (primaryKey.name().trim().isEmpty() == false) ? primaryKey.name().trim() : field.getName();
                 results.put(columnName, field.getName());
-            }else if (field.isAnnotationPresent(ClusteringKey.class)){
+            } else if (field.isAnnotationPresent(ClusteringKey.class)) {
                 ClusteringKey column = field.getAnnotation(ClusteringKey.class);
                 String columnName = (column.name().trim().isEmpty() == false) ? column.name().trim() : field.getName();
                 results.put(columnName, field.getName());
-            }else{
+            } else {
                 results.put(field.getName(), field.getName());
             }
         }
