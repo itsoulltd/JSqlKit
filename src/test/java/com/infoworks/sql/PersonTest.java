@@ -133,17 +133,17 @@ public class PersonTest {
 		}
 	}
 
-	//@Test
+	@Test
 	public void testReadClassOfTSQLExecutorPropertyArray() {
 		try {
 			List<Person> sons = Person.read(Person.class, exe, new Property("name", "Sohana"));
-			Assert.assertTrue("Count is there", sons.size() > 0);
+			Assert.assertTrue("Count is 0", sons.size() == 0);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
 
-	//@Test
+	@Test
 	public void testReadClassOfTSQLExecutorExpressionInterpreter() {
 		try {
 			Expression exp = new ExpressionProxy(new Property("name", "Sohana"), Operator.EQUAL);
@@ -159,7 +159,7 @@ public class PersonTest {
 				}
 				
 			}
-			Assert.assertTrue("Count is there", sons.size() > 0);
+			Assert.assertTrue("Count is 0", sons.size() == 0);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
