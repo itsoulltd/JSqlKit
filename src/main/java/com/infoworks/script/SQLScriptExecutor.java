@@ -92,7 +92,7 @@ public class SQLScriptExecutor {
                             || cmd.toLowerCase().startsWith(COMMENT_COLUMN_PREFIX.toLowerCase())) {
                         if (executor.executeUpdate(cmd) == 0) {
                             tracker.incrementEffective(tableName);
-                        }else {
+                        } else {
                             tracker.incrementFailed(tableName);
                         }
                     }
