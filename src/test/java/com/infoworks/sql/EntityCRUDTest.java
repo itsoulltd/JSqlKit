@@ -2,6 +2,7 @@ package com.infoworks.sql;
 
 import com.infoworks.PLogger;
 import com.infoworks.connect.JDBCDriverClass;
+import com.infoworks.connect.JDBConnection;
 import com.infoworks.script.SQLScriptExecutor;
 import com.infoworks.entity.Entity;
 import com.infoworks.sql.executor.SQLExecutor;
@@ -18,6 +19,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.io.File;
+import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
@@ -34,18 +36,14 @@ public class EntityCRUDTest {
         exe = new SQLExecutor.Builder(JDBCDriverClass.H2_EMBEDDED)
                 .database("testH2DB")
                 .credential("sa", "").build();
-        //
+        //How to initialize DB with Seed:
         SQLScriptExecutor runner = new SQLScriptExecutor();
         File file = new File(sql_file_name_v14);
         String[] cmds = runner.commands(runner.createStream(file));
-        for (String cmd:cmds) {
-            try {
-                exe.executeDDLQuery(cmd);
-            } catch (SQLException e) {
-                System.out.println(e.getMessage());
-            }
-        }
-        //
+        try (Connection conn = new JDBConnection.Builder(JDBCDriverClass.H2_EMBEDDED)
+                .database("testH2DB").credential("sa", "").build()) {
+            runner.execute(cmds, conn);
+        } //
     }
 
     @After

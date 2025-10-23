@@ -99,7 +99,7 @@ public class SQLScriptExecutor {
                 } catch (SQLException e){ log.warning(e.getMessage());}
             });
             printExecutionMessage(tracker.getEffectiveKeys());
-        }catch (Exception e) {log.warning(e.getMessage());}
+        } catch (Exception e) {log.warning(e.getMessage());}
     }
 
     private void printExecutionMessage(List<String> keys) {
