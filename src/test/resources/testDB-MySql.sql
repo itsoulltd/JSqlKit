@@ -1,6 +1,6 @@
 
-DROP table IF EXISTS Passenger;
-DROP table IF EXISTS Person;
+DROP TABLE IF EXISTS Passenger;
+DROP TABLE IF EXISTS Person;
 
 CREATE TABLE IF NOT EXISTS Passenger
 (

@@ -15,17 +15,30 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Logger;
 
 public class SQLScriptExecutor {
-
+    //DDL:
     private final String USE_PREFIX = "USE ";
+    private final String CREATE_DATABASE_PREFIX = "CREATE DATABASE ";
+    private final String DROP_DATABASE_PREFIX = "DROP DATABASE ";
+    private final String CREATE_VIEW_PREFIX = "CREATE VIEW ";
+    private final String DROP_VIEW_PREFIX = "DROP VIEW ";
+    private final String CREATE_INDEX_PREFIX = "CREATE INDEX ";
+    private final String DROP_INDEX_PREFIX = "DROP INDEX ";
     private final String CREATE_TABLE_PREFIX = "CREATE TABLE ";
     private final String CREATE_TABLE_IF_NOT_PREFIX = "CREATE TABLE IF NOT EXISTS ";
     private final String DROP_TABLE_PREFIX = "DROP TABLE ";
+    private final String ALTER_TABLE_PREFIX = "ALTER TABLE ";
+    private final String TRUNCATE_TABLE_PREFIX = "TRUNCATE TABLE ";
+    private final String RENAME_TABLE_PREFIX = "RENAME TABLE ";
+    private final String COMMENT_TABLE_PREFIX = "COMMENT ON TABLE ";
+    private final String COMMENT_COLUMN_PREFIX = "COMMENT ON COLUMN ";
+    //DML:
     private final String SELECT_PREFIX= "SELECT";
     private final String INSERT_PREFIX= "INSERT";
     private final String INSERT_INTO_PREFIX= "INSERT INTO";
     private final String UPDATE_PREFIX= "UPDATE";
     private final String DELETE_PREFIX= "DELETE";
     private final String DELETE_FROM_PREFIX= "DELETE FROM";
+
     private Logger log = Logger.getLogger(this.getClass().getSimpleName());
     private CmdExecutionTracker tracker = new CmdExecutionTracker();
 
@@ -48,29 +61,42 @@ public class SQLScriptExecutor {
                     if (cmd.toLowerCase().startsWith(INSERT_PREFIX.toLowerCase())) {
                         if (executor.executeUpdate(cmd) > 0){
                             tracker.incrementEffective(tableName);
-                        }else {
+                        } else {
                             tracker.incrementFailed(tableName);
                         }
                     } if (cmd.toLowerCase().startsWith(UPDATE_PREFIX.toLowerCase())) {
                         if (executor.executeUpdate(cmd) > 0){
                             tracker.incrementEffective(tableName);
-                        }else {
+                        } else {
                             tracker.incrementFailed(tableName);
                         }
                     } if (cmd.toLowerCase().startsWith(DELETE_PREFIX.toLowerCase())) {
                         if (executor.executeUpdate(cmd) >= 0){
                             tracker.incrementEffective(tableName);
-                        }else {
+                        } else {
                             tracker.incrementFailed(tableName);
                         }
-                    } else {
+                    } else if(cmd.toLowerCase().startsWith(USE_PREFIX.toLowerCase())
+                            || cmd.toLowerCase().startsWith(CREATE_DATABASE_PREFIX.toLowerCase())
+                            || cmd.toLowerCase().startsWith(DROP_DATABASE_PREFIX.toLowerCase())
+                            || cmd.toLowerCase().startsWith(CREATE_VIEW_PREFIX.toLowerCase())
+                            || cmd.toLowerCase().startsWith(DROP_VIEW_PREFIX.toLowerCase())
+                            || cmd.toLowerCase().startsWith(CREATE_INDEX_PREFIX.toLowerCase())
+                            || cmd.toLowerCase().startsWith(DROP_INDEX_PREFIX.toLowerCase())
+                            || cmd.toLowerCase().startsWith(CREATE_TABLE_PREFIX.toLowerCase())
+                            || cmd.toLowerCase().startsWith(DROP_TABLE_PREFIX.toLowerCase())
+                            || cmd.toLowerCase().startsWith(ALTER_TABLE_PREFIX.toLowerCase())
+                            || cmd.toLowerCase().startsWith(TRUNCATE_TABLE_PREFIX.toLowerCase())
+                            || cmd.toLowerCase().startsWith(RENAME_TABLE_PREFIX.toLowerCase())
+                            || cmd.toLowerCase().startsWith(COMMENT_TABLE_PREFIX.toLowerCase())
+                            || cmd.toLowerCase().startsWith(COMMENT_COLUMN_PREFIX.toLowerCase())) {
                         if (executor.executeUpdate(cmd) == 0) {
                             tracker.incrementEffective(tableName);
                         }else {
                             tracker.incrementFailed(tableName);
                         }
                     }
-                }catch (SQLException e){ log.warning(e.getMessage());}
+                } catch (SQLException e){ log.warning(e.getMessage());}
             });
             printExecutionMessage(tracker.getEffectiveKeys());
         }catch (Exception e) {log.warning(e.getMessage());}
