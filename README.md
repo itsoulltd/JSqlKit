@@ -1,5 +1,5 @@
 ## JSqlKit
-[![](https://jitpack.io/v/itsoulltd/JSQLEditor.svg)](https://jitpack.io/#itsoulltd/JSQLEditor)
+[![](https://jitpack.io/v/itsoulltd/JSqlKit.svg)](https://jitpack.io/#itsoulltd/JSqlKit)
 ### SetUp
        
        Step 1. Add the JitPack repository to your build file
@@ -12,10 +12,10 @@
         
         Step 2. Add the dependency
         <dependency>
-            <groupId>com.github.itsoulltd.JSqlKit</groupId>
-            <artifactId>java-sql-kit</artifactId>
+            <groupId>com.github.itsoulltd</groupId>
+            <artifactId>JSqlKit</artifactId>
+            <version>latest</version>
         </dependency>
-
 
 ### JSqlKit has 3 ways of connecting with DataSource:
 ----

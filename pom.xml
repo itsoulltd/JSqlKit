@@ -16,7 +16,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <jakarta.version>3.0.0</jakarta.version>
         <cassandra.version>3.11.0</cassandra.version>
-        <jfkit.version>v1.0.0</jfkit.version>
+        <jfkit.version>[v1.0.0, )</jfkit.version>
     </properties>
 
     <repositories>
