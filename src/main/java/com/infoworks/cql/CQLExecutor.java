@@ -10,23 +10,25 @@ import com.infoworks.connect.JDBCDriverClass;
 import com.infoworks.cql.entity.CQLEntity;
 import com.infoworks.cql.entity.CQLIndex;
 import com.infoworks.cql.entity.ClusteringKey;
+import com.infoworks.cql.query.ReplicationStrategy;
 import com.infoworks.cql.query.*;
-import com.infoworks.sql.executor.AbstractExecutor;
-import com.infoworks.sql.executor.QueryExecutor;
 import com.infoworks.entity.Column;
 import com.infoworks.entity.Entity;
-import com.infoworks.objects.Ignore;
 import com.infoworks.entity.PrimaryKey;
-import com.infoworks.sql.query.QueryType;
-import com.infoworks.sql.query.SQLScalarQuery;
-import com.infoworks.sql.query.SQLSelectQuery;
+import com.infoworks.objects.Ignore;
 import com.infoworks.orm.Property;
 import com.infoworks.orm.Row;
 import com.infoworks.orm.Table;
+import com.infoworks.sql.executor.AbstractExecutor;
+import com.infoworks.sql.executor.QueryExecutor;
+import com.infoworks.sql.query.QueryType;
+import com.infoworks.sql.query.SQLScalarQuery;
+import com.infoworks.sql.query.SQLSelectQuery;
 import com.infoworks.sql.query.models.Where;
 
 import java.awt.image.BufferedImage;
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.nio.ByteBuffer;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -376,10 +378,10 @@ public class CQLExecutor extends AbstractExecutor implements QueryExecutor<CQLSe
                         try {
                             List<T> results = table.inflate(aClass, CQLEntity.mapColumnsToProperties(aClass));
                             consumer.accept(results);
-                        } catch (InstantiationException e) {
+                        } catch (InstantiationException | IllegalAccessException e) {
                             LOG.log(Level.WARNING,e.getMessage(), e);
                             consumer.accept(null);
-                        } catch (IllegalAccessException e) {
+                        } catch (NoSuchMethodException | InvocationTargetException e) {
                             LOG.log(Level.WARNING,e.getMessage(), e);
                             consumer.accept(null);
                         }

@@ -7,7 +7,7 @@
     <groupId>com.infoworks.lab</groupId>
     <artifactId>java-sql-kit</artifactId>
     <packaging>jar</packaging>
-    <version>1.0-SNAPSHOT</version>
+    <version>v1.0.0</version>
 
     <properties>
         <java.version>11</java.version>
@@ -16,6 +16,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <jakarta.version>3.0.0</jakarta.version>
         <cassandra.version>3.11.0</cassandra.version>
+        <jfkit.version>v1.0.0</jfkit.version>
     </properties>
 
     <repositories>
@@ -30,6 +31,11 @@
     </repositories>
 
     <dependencies>
+        <dependency>
+            <groupId>com.github.itsoulltd</groupId>
+            <artifactId>JFoundationKit</artifactId>
+            <version>${jfkit.version}</version>
+        </dependency>
         <!-- https://mvnrepository.com/artifact/jakarta.persistence/jakarta.persistence-api -->
         <dependency>
             <groupId>jakarta.persistence</groupId>

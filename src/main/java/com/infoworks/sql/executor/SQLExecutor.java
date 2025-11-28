@@ -3,12 +3,13 @@ package com.infoworks.sql.executor;
 import com.infoworks.connect.JDBCDriverClass;
 import com.infoworks.connect.JDBConnection;
 import com.infoworks.entity.Entity;
-import com.infoworks.sql.query.*;
 import com.infoworks.orm.DataType;
 import com.infoworks.orm.Property;
 import com.infoworks.orm.Row;
 import com.infoworks.orm.Table;
+import com.infoworks.sql.query.*;
 
+import java.lang.reflect.InvocationTargetException;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -182,13 +183,17 @@ public class SQLExecutor extends AbstractExecutor implements QueryExecutor<SQLSe
 	@Override
 	public <T extends Entity> List<T> executeCRUDQuery(String query, Class<T> type) throws SQLException, IllegalAccessException, InstantiationException {
 		ResultSet set = executeCRUDQuery(query);
-		if (set != null){
-			Table table = collection(set);
-			List results = table.inflate(type, Entity.mapColumnsToProperties(type));
+		List<T> results = null;
+		if (set != null) {
+			try {
+				Table table = collection(set);
+				results = table.inflate(type, Entity.mapColumnsToProperties(type));
+			} catch (InvocationTargetException | NoSuchMethodException e) {
+				throw new InstantiationException(e.getMessage());
+			}
 			set.close();
-			return results;
 		}
-		return null;
+		return results;
 	}
 
 	public Integer executeUpdate(SQLUpdateQuery query) throws SQLException {
@@ -634,9 +639,14 @@ public class SQLExecutor extends AbstractExecutor implements QueryExecutor<SQLSe
 	@Override
 	public <T extends Entity> List<T> executeSelect(String query, Class<T> type, Map<String, String> mappingKeys)
 			throws SQLException, IllegalArgumentException, IllegalAccessException, InstantiationException {
+		List<T> result;
 		ResultSet set = executeSelect(query);
-		Table table = collection(set);
-		List result = table.inflate(type, mappingKeys);
+		try {
+			Table table = collection(set);
+			result = table.inflate(type, mappingKeys);
+		} catch (InvocationTargetException | NoSuchMethodException e) {
+			throw new InstantiationException(e.getMessage());
+		}
 		if(set != null) set.close();
 		return result;
 	}
@@ -649,9 +659,14 @@ public class SQLExecutor extends AbstractExecutor implements QueryExecutor<SQLSe
 	@Override
 	public <T extends Entity> List<T> executeSelect(SQLSelectQuery query, Class<T> type, Map<String, String> mappingKeys)
 			throws SQLException, IllegalArgumentException, IllegalAccessException, InstantiationException {
+		List<T> result;
 		ResultSet set = executeSelect(query);
-		Table table = collection(set);
-		List result = table.inflate(type, mappingKeys);
+		try {
+			Table table = collection(set);
+			result = table.inflate(type, mappingKeys);
+		} catch (InvocationTargetException | NoSuchMethodException e) {
+			throw new InstantiationException(e.getMessage());
+		}
 		if(set != null) set.close();
 		return result;
 	}
@@ -802,8 +817,7 @@ public class SQLExecutor extends AbstractExecutor implements QueryExecutor<SQLSe
      * @param query
      * @return ResultSet
      */
-    public ResultSet executeSelect(String query, Property...properties)
-    throws SQLException, IllegalArgumentException {
+    public ResultSet executeSelect(String query, Property...properties) throws SQLException, IllegalArgumentException {
     	
         PreparedStatement stmt = null;
         ResultSet rst=null;
@@ -846,8 +860,7 @@ public class SQLExecutor extends AbstractExecutor implements QueryExecutor<SQLSe
      * @throws IllegalArgumentException
      */
     
-    public ResultSet executeSelect(SQLSelectQuery query)
-    throws SQLException, IllegalArgumentException {
+    public ResultSet executeSelect(SQLSelectQuery query) throws SQLException, IllegalArgumentException {
     	
         PreparedStatement stmt = null;
         ResultSet rst=null;

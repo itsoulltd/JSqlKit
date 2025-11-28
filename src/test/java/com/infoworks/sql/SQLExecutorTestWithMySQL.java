@@ -16,6 +16,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.io.File;
+import java.lang.reflect.InvocationTargetException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.DateFormat;
@@ -144,7 +145,8 @@ public class SQLExecutorTestWithMySQL extends SQLExecutorTest {
     }
 
     @Test
-    public void selectWithStrAndProp() throws SQLException, IllegalAccessException, InstantiationException {
+    public void selectWithStrAndProp() throws SQLException, IllegalAccessException, InstantiationException
+            , InvocationTargetException, NoSuchMethodException {
         insertInto(20, null);
         //
         String query = "Select * from Passenger where name = ? and age > ?";
