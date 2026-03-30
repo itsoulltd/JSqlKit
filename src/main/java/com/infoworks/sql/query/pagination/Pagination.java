@@ -3,6 +3,7 @@ package com.infoworks.sql.query.pagination;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
 import java.util.List;
+import com.infoworks.objects.SortOrder;
 
 public interface Pagination<P extends Pagination> {
 

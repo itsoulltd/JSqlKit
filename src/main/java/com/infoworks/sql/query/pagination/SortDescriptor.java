@@ -1,7 +1,7 @@
 package com.infoworks.sql.query.pagination;
 
 import com.infoworks.entity.Entity;
-
+import com.infoworks.objects.SortOrder;
 import java.io.Externalizable;
 import java.io.IOException;
 import java.io.ObjectInput;

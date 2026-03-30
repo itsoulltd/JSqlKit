@@ -2,6 +2,7 @@ package com.infoworks.sql.query.pagination;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.infoworks.objects.Message;
+import com.infoworks.objects.SortOrder;
 import com.infoworks.objects.MessageParser;
 import com.infoworks.sql.query.models.ExpressionProxy;
 import org.junit.After;
