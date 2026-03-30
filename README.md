@@ -409,6 +409,46 @@
     List<OrderEvent> otherItems = OrderEvent.read(OrderEvent.class, cqlExecutor, predicate);
     otherItems.stream().forEach(event -> System.out.println("track_id "+event.getTrackID()));
 
+####
+##### Let's know about PagingQuery.java & SearchQuery.java!
+
+    ===
+    SearchQuery query = Pagination.of(SearchQuery.class
+            , 0
+            , 10
+            , SortOrder.ASC
+            , "CLUSTER_NAME","REGION_NAME", "AM_NAME");
+
+    query.add("ROLE_NAME").isEqualTo("Gittu")
+            .or("PERSON_MOBILE").isEqualTo("01712645571")
+            .and("AGE").isGreaterThen(32);
+
+    System.out.println("Newly-Created: " + query.toString());
+    ###Output:
+    {
+        "page":0,"size":10,
+        "descriptors":[{"order":"ASC","keys":["CLUSTER_NAME","REGION_NAME","AM_NAME"]}],
+        "properties":[
+            {"key":"ROLE_NAME","value":"Gittu","operator":"EQUAL","type":"STRING","nextKey":"PERSON_MOBILE","logic":"OR"},
+            {"key":"PERSON_MOBILE","value":"01712645571","operator":"EQUAL","type":"STRING","nextKey":"AGE","logic":"AND"},
+            {"key":"AGE","value":"32","operator":"GREATER_THAN","type":"INT"}]
+    }
+    
+    ###Now Assume we have a Json String: (carrying over Http Request @Body)
+    String json = "{\"page\":0,\"size\":10,\"descriptors\":[{\"order\":\"ASC\",\"keys\":[\"CLUSTER_NAME\",\"REGION_NAME\",\"AM_NAME\"]}],\"properties\":[{\"key\":\"ROLE_NAME\",\"value\":\"Gittu\",\"operator\":\"EQUAL\",\"type\":\"STRING\",\"nextKey\":\"PERSON_MOBILE\",\"logic\":\"OR\"},{\"key\":\"PERSON_MOBILE\",\"value\":\"01712645571\",\"operator\":\"EQUAL\",\"type\":\"STRING\",\"nextKey\":\"AGE\",\"logic\":\"AND\"},{\"key\":\"AGE\",\"value\":\"32\",\"operator\":\"GREATER_THAN\",\"type\":\"INT\"}]}\n";
+    SearchQuery recreated = MessageMapper.unmarshal(SearchQuery.class, json);
+    System.out.println("Re-Created: " + recreated.toString());
+    ###Output:
+    {
+        "page":0,"size":10,
+        "descriptors":[{"order":"ASC","keys":["CLUSTER_NAME","REGION_NAME","AM_NAME"]}],
+        "properties":[
+            {"key":"ROLE_NAME","value":"Gittu","operator":"EQUAL","type":"STRING","nextKey":"PERSON_MOBILE","logic":"OR"},
+            {"key":"PERSON_MOBILE","value":"01712645571","operator":"EQUAL","type":"STRING","nextKey":"AGE","logic":"AND"},
+            {"key":"AGE","value":"32","operator":"GREATER_THAN","type":"INT"}]
+    }
+    ===
+
 ### Questions?
 -------------
 ##### Send your query to us: m.towhid.islam@gmail.com
